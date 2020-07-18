@@ -1,17 +1,10 @@
-#!/usr/bin/pypy
+#!/usr/bin/pypy -O
 """
 RollsumChunking modelling.
 
-This uses a chunking probability criteria where the hash is treated as a fixed
-point number in the range 0.0 -> 1.0 and compared to a probablity of;
-
-p = 2*(i - min_size)^2 / target_size^3
-
-The position i is a chunk boundary if h <= p.
 """
 from stats1 import Sample
 import random
-
 
 class Data(object):
   """ Data source with rollsums and block hashes. """
@@ -55,6 +48,9 @@ class Data(object):
         # delete del_c bytes...
         for d in range(self.del_c):
           self.dat.randrange(2**32)
+        #print "%12d: start replace, del=%d" % (self.tot_c, self.del_c)
+      #elif i == self.mod_e:
+      #  print "%12d: stop replace, ins=%d" % (self.tot_c, self.ins_c)
       # Between mod_o and mod_e insert new data, otherwise use duplicate data.
       if self.mod_o <= i < self.mod_e:
         h = self.ins.randrange(2**32)
@@ -94,7 +90,7 @@ class Chunker(object):
     self.max_len = max_len
     self.tgt_len = tgt_len
     self.reset()
-    
+
   def reset(self):
     self.stats = Sample()
     self.initblock()
@@ -120,19 +116,27 @@ class Chunker(object):
     return "%s(avg_len=%s, min_len=%s, max_len=%s)" % (self.__class__.__name__, self.avg_len, self.min_len, self.max_len)
 
   def __str__(self):
-    
     return "%r: %s" % (self, str(self.stats)[10:])
 
 
 class NormChunker(Chunker):
+  """ NormChunker class.
 
+  This uses a chunking probability criteria where the hash is treated as a fixed
+  point number in the range 0.0 -> 1.0 and compared to a probablity of;
+
+  p = 2*(i - min_size)^2 / target_size^3
+
+  The position i is a chunk boundary if h < p.
+  """
   def reset(self):
     # step and incr are an incremental way to calculate p = K * x^2. The initial
     # step for incrementing p is p calculated for x=1, and at each update we
-    # increment step by 2x that much.
+    # increment step by 2x that much. We calculate the increment here since it
+    # is fixed, and reset step to half that in initblock().
     self.incr = 2**32 * 4.0 / self.tgt_len**3
     super(NormChunker, self).reset()
-    
+
   def initblock(self):
     self.blk_len = 0
     self.prob = 0.0
@@ -144,9 +148,16 @@ class NormChunker(Chunker):
     if self.blk_len > self.min_len:
       self.prob += self.step
       self.step += self.incr
+      assert(self.prob == 2**32 * 2.0 * (self.blk_len - self.min_len)**2 / self.tgt_len**3)
 
 
 class FastNormChunker(Chunker):
+  """ FastNormChunker class.
+
+  This is the same as NormChunker except it aproximates it using integers only
+  to increment prob every di iterations. This turns out slower in Python, but
+  it would almost certainly be a faster in C.
+  """
 
   def reset(self):
     # set default update interval and scaling values. These scaling values ensure
@@ -157,14 +168,14 @@ class FastNormChunker(Chunker):
       self.di *= 2
       self.incr = (2**32 * 4 * self.di**2) / (self.tgt_len**3)
     super(FastNormChunker, self).reset()
-    
+
   def initblock(self):
     self.blk_len = 0
     self.prob = 0
     self.step = self.incr / 2
 
   def incblock(self):
-    """ Returns the block length or -1 if not a break point. """
+    """ Returns the block length or 0 if not a break point. """
     self.blk_len += 1
     x = self.blk_len - self.min_len
     if (x > 0) and (x % self.di == 0):
@@ -182,6 +193,7 @@ def runtest(data, chunker, data_len):
     if l:
       b = (data.gethash(l), l)
       blocks[b] = blocks.setdefault(b, 0) + 1
+      #print "%12d: %08x %016x len=%d dup=%s" % (data.tot_c, h, b[0], b[1], blocks[b]-1)
   # get stats on duplicate blocs.
   tot_c = tot_n = 0
   dup_c = dup_n = 0
@@ -196,11 +208,12 @@ def runtest(data, chunker, data_len):
   print "blocks: tot=%s dup=%s(%4.2f%%)" % ( tot_n, dup_n, 100.0 * dup_n / tot_n)
   print "found: %4.2f%%" % (100.0 * dup_c / data.dup_c)
   print
+  return tot_n, tot_c, dup_n, dup_c
 
-tsize=2*1024
-bsize=8*1024
 
-data = Data(bnum=tsize/2, bsize=bsize, mnum=2)
+tsize=2*1000
+bsize=8*1000
+data = Data(bnum=tsize/2, bsize=bsize, mnum=4)
 for bavg in (1,2,4,8,16,32,64):
   bavg *= 1024
   for bmin in (0, bavg / 4, bavg / 2, bavg * 3 / 4):
@@ -208,5 +221,5 @@ for bavg in (1,2,4,8,16,32,64):
     for bmax in (16, 8, 4, 2):
       bmax = bmax*btgt + bmin
       data.reset()
-      chunker = Chunker(bavg, bmin, bmax)
-      runtest(data,chunker, tsize*bsize)
+      chunker = NormChunker(bavg, bmin, bmax)
+      runtest(data, chunker, tsize*bsize)
