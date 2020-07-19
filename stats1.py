@@ -1,31 +1,37 @@
 #!/usr/bin/python
 # Data structures and methods for analysis of data.
 
+inf = float('inf')
+
 class Sample(object):
   
-  def __init__(self):
+  def __init__(self, data=None):
     self.num = 0
-    self.sum = 0.0
-    self.sum2 = 0.0
-    self.minv = float('inf')
-    self.maxv = -float('inf')
+    self.sum = 0
+    self.sum2 = 0
+    self.min = inf
+    self.max = -inf
+    if data:
+      self.update(data)
   
   def add(self, v):
     self.num += 1
     self.sum += v
     self.sum2 += v*v
-    if v > self.maxv:
-      self.maxv = v
-    if v < self.minv:
-      self.minv = v
+    self.min = min(self.min, v)
+    self.max = max(self.max, v)
       
+  def update(self, data):
+    for v in data:
+      self.add(v)
+
   @property
   def avg(self):
-    return self.sum/self.num
+    return float(self.sum) / self.num
   
   @property
   def var(self):
-    return (self.sum2-(self.sum*self.sum/self.num))/(self.num)
+    return (self.sum2 - float(self.sum * self.sum) / self.num) / self.num
   
   @property
   def dev(self):
@@ -36,10 +42,10 @@ class Sample(object):
 
   def __str__(self):
     if self.num:
-      return "%r: num=%d avg=%f dev=%f min=%s max=%s" % (
-          self, self.num, self.avg, self.dev, self.minv, self.maxv)
+      return "num=%s sum=%s min/avg/max/dev=%s/%s/%s/%s" % (
+          self.num, self.sum, self.min, self.avg, self.max, self.dev)
     else:
-      return "%r: num=0"
+      return "num=0 sum=0"
 
 #class Histogram:
 #       def Add(i):
