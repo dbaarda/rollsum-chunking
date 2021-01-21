@@ -112,7 +112,7 @@ class Chunker(object):
   """ A standard exponential chunker
 
   This is the standard simple chunker that gives an exponential distribution
-  of block sizes between min and max. The only difference is it uses 'h<=p`
+  of block sizes between min and max. The only difference is it uses 'h<p`
   instead of 'h&mask==r' for the hash judgement, which supports arbitrary
   target block sizes, not just power-of-2 sizes.
 
@@ -134,7 +134,7 @@ class Chunker(object):
   def from_avg(cls, avg_len, min_len=MIN_LEN, max_len=MAX_LEN):
     """Initialize using the avg_len."""
     tgt_len = cls.get_tgt_len(avg_len, min_len, max_len)
-    return cls(tgt_len, min_len, max_len)
+    return cls(int(tgt_len + 0.5), min_len, max_len)
 
   @classmethod
   def get_avg_len(cls, tgt_len, min_len, max_len):
@@ -224,6 +224,44 @@ class NormChunker(Chunker):
       self.step += self.incr
 
 
+class FastCDCChunker(Chunker):
+  """ FastCDCChunker class.
+
+  This implements FastCDC's chunking algorithm modified to use uses a 'h<p'
+  hash judgment to support arbitrary tgt_len values.
+
+  The tgt_len for this chunker is the length where the probability steps up
+  from 1/4x to 4x the normal exponential distribution probablity. Note that
+  min_len doesn't offset this.
+  """
+
+  @classmethod
+  def get_avg_len(cls, tgt_len, min_len, max_len):
+    if tgt_len <= min_len:
+      return min_len
+    tgt_s = tgt_len * 4
+    tgt_l = tgt_len / 4
+    s_avg = min_len + tgt_s # avg length of first exponential distribution.
+    l_avg = tgt_len + tgt_l # avg length of second exponential distribution.
+    s_cut_avg = tgt_len + tgt_s # avg length of first dist cut after tgt_len.
+    l_cut_avg = max_len + tgt_l # avg length of second dist cut after max_len.
+    s_cut_fract = e**(float(min_len - tgt_len)/tgt_s) # fraction of first dist cut.
+    l_cut_fract = e**(float(tgt_len - max_len)/tgt_l) # fraction of second dist cut.
+    return s_avg + s_cut_fract*(l_avg - s_cut_avg + l_cut_fract*(max_len - l_cut_avg))
+
+  def initblock(self):
+    self.blk_len = 0
+    # prob is 1/4 of the normal tgt_len probability.
+    self.prob = 2**30 / self.tgt_len
+
+  def incblock(self):
+    """ Returns the block length or -1 if not a break point. """
+    self.blk_len += 1
+    if self.blk_len == self.tgt_len:
+      # prob is 4x the normal tgt_len probability.
+      self.prob = 2**34 / self.tgt_len
+
+
 class FastNormChunker(NormChunker):
   """ FastNormChunker class.
 
@@ -289,11 +327,12 @@ bsize=8*1000
 data = Data(bnum=tsize/2, bsize=bsize, mnum=4)
 for bavg in (1,2,4,8,16,32,64):
   bavg *= 1024
-  for bmin in (0, bavg / 4, bavg / 2, bavg * 3 / 4):
+  for bmin in (0, 1, 2, 3):
+    bmin *= bavg / 4
     for bmax in (16, 8, 4, 2):
       bmax = bmax*bavg
       data.reset()
-      chunker = NormChunker.from_avg(bavg, bmin, bmax)
+      chunker = FastCDCChunker.from_avg(bavg, bmin, bmax)
       runtest(data, chunker, tsize*bsize)
 
 # Dimensions for graphs;
