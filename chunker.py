@@ -3,16 +3,45 @@
 RollsumChunking modelling.
 
 """
+from math import *
 from stats1 import Sample
 import random
 
+def solve(f, x0=-1.0e9, x1=1.0e9, e=1.0e-9):
+  """ Solve f(x)=0 for x where x0<=x<=x1 within +-e. """
+  y0, y1 = f(x0), f(x1)
+  # y0 and y1 must have different sign.
+  assert y0*y1 <= 0
+  while (x1 - x0) > e:
+    xm = (x0 + x1) / 2.0
+    ym = f(xm)
+    if y0*ym > 0:
+      x0,y0 = xm,ym
+    else:
+      x1,y1 = xm,ym
+  return x0
+
+
 class Data(object):
-  """ Data source with rollsums and block hashes. """
+  """ Data source with rollsums and block hashes.
+
+  It simulates a stream of data that starts with bnum blocks of initial random
+  data that is then repeated every bnum blocks with modifications. The
+  modifications consist of a modification every mnum blocks that starts 1/3 of
+  a block into the first block, and replaces the next 1/7 of a block with 1/5
+  of a block of new random data.
+
+  It simulates returning a 32bit rolling hash for each input byte with
+  getroll(). A simulated strong hash of the previous block can be fetched with
+  gethash(), which also starts a new block.
+
+  It keeps counts of the number of bytes, duplicate bytes, and blocks fetched.
+  """
 
   def __init__(self, bsize=1024, bnum=512, mnum=5, seed=1):
     self.bsize = bsize     # block size.
-    self.bnum = bnum       # number of blocks per cycle.
-    self.mnum = mnum       # number of blocks per change.
+    self.bnum = bnum       # number of blocks before repeating.
+    self.mnum = mnum       # number of repeated blocks per change.
     self.seed = seed
     self.dat_p = bsize * bnum # period over which data repeats.
     self.mod_p = bsize * mnum # period over which changes happen.
@@ -27,9 +56,9 @@ class Data(object):
     self.dup_c = 0         # duplicate bytes scanned.
     self.blk_n = 0         # number of block hashes returned.
     self.blkh = 0          # the accumulated whole block hash.
-    # Initialize the random generators.
+    # Initialize the random generators for the original and inserted data.
     self.dat = random.Random(self.seed)
-    self.ins = random.Random(self.seed +6)
+    self.ins = random.Random(self.seed + 6)
 
   def getroll(self):
     """ Get the next rolling hash. """
@@ -45,7 +74,7 @@ class Data(object):
       i = c % self.mod_p
       # At offset mod_o modify stuff.
       if i == self.mod_o:
-        # delete del_c bytes...
+        # delete del_c bytes by sucking them out of dat.
         for d in range(self.del_c):
           self.dat.randrange(2**32)
         #print "%12d: start replace, del=%d" % (self.tot_c, self.del_c)
@@ -59,8 +88,11 @@ class Data(object):
         h = self.dat.randrange(2**32)
     self.tot_c += 1
     # update blkh.
-    self.blkh += h
+    self.addhash(h)
     return h
+
+  def addhash(self, h):
+    self.blkh = hash((self.blkh, h))
 
   def gethash(self, l):
     """ Get a strong hash of the past l bytes and reset for a new block. """
@@ -77,19 +109,45 @@ class Data(object):
 
 
 class Chunker(object):
+  """ A standard exponential chunker
 
-  def __init__(self, avg_len, min_len=None, max_len=None):
-    if min_len == None:
-      min_len = avg_len / 5
-    tgt_len = avg_len - min_len
-    if max_len == None:
-      max_len = tgt_len * 4 + min_len
-    assert min_len < avg_len < max_len
-    self.avg_len = avg_len
+  This is the standard simple chunker that gives an exponential distribution
+  of block sizes between min and max. The only difference is it uses 'h<=p`
+  instead of 'h&mask==r' for the hash judgement, which supports arbitrary
+  target block sizes, not just power-of-2 sizes.
+
+  The tgt_len for this chunker represents the exponential distribution mean
+  size, not including the affects of min_len and max_len.
+  """
+
+  MIN_LEN, MAX_LEN = 0, 2**32
+
+  def __init__(self, tgt_len, min_len=MIN_LEN, max_len=MAX_LEN):
+    assert min_len < max_len
+    self.tgt_len = tgt_len
     self.min_len = min_len
     self.max_len = max_len
-    self.tgt_len = tgt_len
+    self.avg_len = self.get_avg_len(tgt_len, min_len, max_len)
     self.reset()
+
+  @classmethod
+  def from_avg(cls, avg_len, min_len=MIN_LEN, max_len=MAX_LEN):
+    """Initialize using the avg_len."""
+    tgt_len = cls.get_tgt_len(avg_len, min_len, max_len)
+    return cls(tgt_len, min_len, max_len)
+
+  @classmethod
+  def get_avg_len(cls, tgt_len, min_len, max_len):
+    """Get the avg_len given a tgt_len."""
+    try:
+      return min_len + (1.0 - e**(float(min_len - max_len)/tgt_len)) * tgt_len
+    except ZeroDivisionError:
+      return min_len
+
+  @classmethod
+  def get_tgt_len(cls, avg_len, min_len, max_len):
+    """Get the tgt_len given an avg_len."""
+    return solve(lambda x: cls.get_avg_len(x, min_len, max_len) - avg_len, min_len, max_len)
 
   def reset(self):
     self.stats = Sample()
@@ -113,10 +171,10 @@ class Chunker(object):
     return 0
 
   def __repr__(self):
-    return "%s(avg_len=%s, min_len=%s, max_len=%s)" % (self.__class__.__name__, self.avg_len, self.min_len, self.max_len)
+    return "%s(tgt_len=%s, min_len=%s, max_len=%s)" % (self.__class__.__name__, self.tgt_len, self.min_len, self.max_len)
 
   def __str__(self):
-    return "%r: %s" % (self, str(self.stats)[10:])
+    return "%r: avg_len=%s %s" % (self, self.avg_len, self.stats)
 
 
 class NormChunker(Chunker):
@@ -128,8 +186,23 @@ class NormChunker(Chunker):
   p = 2*(i - min_size)^2 / target_size^3
 
   The position i is a chunk boundary if h < p.
+
+  The tgt_len for this chunker represents the distribution mode point, not
+  including the effects of min_len and max_len.
   """
+
+  @classmethod
+  def get_avg_len(cls, tgt_len, min_len, max_len):
+    assert min_len + 2*tgt_len <= max_len
+    return min_len + tgt_len * (3.0/2.0)**(1.0/3.0) * gamma(4.0/3.0)
+
+  @classmethod
+  def get_tgt_len(cls, avg_len, min_len, max_len):
+    assert 2*avg_len - min_len <= max_len
+    return (avg_len - min_len) * ((2.0/3.0)**(1.0/3.0)) / gamma(4.0/3.0)
+
   def reset(self):
+    # self.K = 2**32 * 2.0 / self.tgt_len**3
     # step and incr are an incremental way to calculate p = K * x^2. The initial
     # step for incrementing p is p calculated for x=1, and at each update we
     # increment step by 2x that much. We calculate the increment here since it
@@ -146,27 +219,27 @@ class NormChunker(Chunker):
     """ Returns the block length or -1 if not a break point. """
     self.blk_len += 1
     if self.blk_len > self.min_len:
+      # self.prob = self.K * (self.blk_len - self.min_len)**2
       self.prob += self.step
       self.step += self.incr
-      assert(self.prob == 2**32 * 2.0 * (self.blk_len - self.min_len)**2 / self.tgt_len**3)
 
 
-class FastNormChunker(Chunker):
+class FastNormChunker(NormChunker):
   """ FastNormChunker class.
 
   This is the same as NormChunker except it aproximates it using integers only
-  to increment prob every di iterations. This turns out slower in Python, but
+  to increment prob every dx iterations. This turns out slower in Python, but
   it would almost certainly be a faster in C.
   """
 
   def reset(self):
     # set default update interval and scaling values. These scaling values ensure
     # that incr is large enough to be accurate (greater than 2^7).
-    self.di = 1  # update interval.
-    self.incr = (2**32 * 4) / (self.tgt_len**3)
+    dx, incr = 1, (2**32 * 4) / (self.tgt_len**3)
     while incr < 128:
-      self.di *= 2
-      self.incr = (2**32 * 4 * self.di**2) / (self.tgt_len**3)
+      dx *= 2
+      incr = (2**32 * 4 * dx**2) / (self.tgt_len**3)
+    self.incr, self.mask = incr, dx - 1
     super(FastNormChunker, self).reset()
 
   def initblock(self):
@@ -178,7 +251,7 @@ class FastNormChunker(Chunker):
     """ Returns the block length or 0 if not a break point. """
     self.blk_len += 1
     x = self.blk_len - self.min_len
-    if (x > 0) and (x % self.di == 0):
+    if (x > 0) and (x & self.mask == 0):
       self.prob += self.step
       self.step += self.incr
 
@@ -217,9 +290,17 @@ data = Data(bnum=tsize/2, bsize=bsize, mnum=4)
 for bavg in (1,2,4,8,16,32,64):
   bavg *= 1024
   for bmin in (0, bavg / 4, bavg / 2, bavg * 3 / 4):
-    btgt = bavg - bmin
     for bmax in (16, 8, 4, 2):
-      bmax = bmax*btgt + bmin
+      bmax = bmax*bavg
       data.reset()
-      chunker = NormChunker(bavg, bmin, bmax)
+      chunker = NormChunker.from_avg(bavg, bmin, bmax)
       runtest(data, chunker, tsize*bsize)
+
+# Dimensions for graphs;
+#
+# chunker (chunker, normchunker)
+# min size (0, 1/4, 1/2, 3/4)
+# max_size (16, 8, 4, 2)
+# avg_size (1,2,4, 8, 16, 32, 64)
+#
+#
