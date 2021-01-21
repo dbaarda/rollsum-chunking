@@ -133,8 +133,8 @@ class Chunker(object):
   @classmethod
   def from_avg(cls, avg_len, min_len=MIN_LEN, max_len=MAX_LEN):
     """Initialize using the avg_len."""
-    tgt_len = cls.get_tgt_len(avg_len, min_len, max_len)
-    return cls(int(tgt_len + 0.5), min_len, max_len)
+    tgt_len = int(cls.get_tgt_len(avg_len, min_len, max_len))
+    return cls(tgt_len, min_len, max_len)
 
   @classmethod
   def get_avg_len(cls, tgt_len, min_len, max_len):
@@ -337,7 +337,7 @@ for bavg in (1,2,4,8,16,32,64):
 
 # Dimensions for graphs;
 #
-# chunker (chunker, normchunker)
+# chunker (chunker, normchunker, FastCDCChunker)
 # min size (0, 1/4, 1/2, 3/4)
 # max_size (16, 8, 4, 2)
 # avg_size (1,2,4, 8, 16, 32, 64)
