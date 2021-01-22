@@ -216,7 +216,6 @@ class NormChunker(Chunker):
     self.step = self.incr / 2.0
 
   def incblock(self):
-    """ Returns the block length or -1 if not a break point. """
     self.blk_len += 1
     if self.blk_len > self.min_len:
       # self.prob = self.K * (self.blk_len - self.min_len)**2
@@ -259,7 +258,6 @@ class FastCDCChunker(Chunker):
     self.prob = 2**30 / self.tgt_len
 
   def incblock(self):
-    """ Returns the block length or -1 if not a break point. """
     self.blk_len += 1
     if self.blk_len == self.tgt_len:
       # prob is 4x the normal tgt_len probability.
@@ -290,7 +288,6 @@ class FastNormChunker(NormChunker):
     self.step = self.incr / 2
 
   def incblock(self):
-    """ Returns the block length or 0 if not a break point. """
     self.blk_len += 1
     x = self.blk_len - self.min_len
     if (x > 0) and (x & self.mask == 0):
@@ -336,7 +333,7 @@ for bavg in (1,2,4,8,16,32,64):
     for bmax in (16, 8, 4, 2):
       bmax = bmax*bavg
       data.reset()
-      chunker = Chunker.from_avg(bavg, bmin, bmax)
+      chunker = NormChunker.from_avg(bavg, bmin, bmax)
       runtest(data, chunker, tsize*bsize)
 
 # Dimensions for graphs;
