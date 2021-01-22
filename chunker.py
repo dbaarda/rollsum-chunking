@@ -147,7 +147,7 @@ class Chunker(object):
   @classmethod
   def get_tgt_len(cls, avg_len, min_len, max_len):
     """Get the tgt_len given an avg_len."""
-    return solve(lambda x: cls.get_avg_len(x, min_len, max_len) - avg_len, min_len, max_len)
+    return solve(lambda x: cls.get_avg_len(x, min_len, max_len) - avg_len, 0.0)
 
   def reset(self):
     self.stats = Sample()
@@ -238,7 +238,11 @@ class FastCDCChunker(Chunker):
   @classmethod
   def get_avg_len(cls, tgt_len, min_len, max_len):
     if tgt_len <= min_len:
-      return min_len
+      # It's the same as Chunker with tgt_len/4.
+      return Chunker.get_avg_len(tgt_len / 4, min_len, max_len)
+    if tgt_len >= max_len:
+      # It's the same as Chunker with tgt_len*4.
+      return Chunker.get_avg_len(tgt_len * 4, min_len, max_len)
     tgt_s = tgt_len * 4
     tgt_l = tgt_len / 4
     s_avg = min_len + tgt_s # avg length of first exponential distribution.
@@ -332,7 +336,7 @@ for bavg in (1,2,4,8,16,32,64):
     for bmax in (16, 8, 4, 2):
       bmax = bmax*bavg
       data.reset()
-      chunker = FastCDCChunker.from_avg(bavg, bmin, bmax)
+      chunker = Chunker.from_avg(bavg, bmin, bmax)
       runtest(data, chunker, tsize*bsize)
 
 # Dimensions for graphs;
