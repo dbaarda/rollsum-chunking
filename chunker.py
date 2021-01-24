@@ -21,6 +21,19 @@ def solve(f, x0=-1.0e9, x1=1.0e9, e=1.0e-9):
       x1,y1 = xm,ym
   return x0
 
+def gammalower(s, z):
+  # Make sure s is a float.
+  s=float(s)
+  # For large z it converges to gamma(s).
+  if z >= 32:
+    return gamma(s)
+  tot = term = z**s * e**-z / s
+  # For the range of z and s values we care about, this is enough iterations.
+  for i in range(1,int(2*z)+12):
+    term *= z / (s+i)
+    tot += term
+  return tot
+
 
 class Data(object):
   """ Data source with rollsums and block hashes.
@@ -133,7 +146,7 @@ class Chunker(object):
   @classmethod
   def from_avg(cls, avg_len, min_len=MIN_LEN, max_len=MAX_LEN):
     """Initialize using the avg_len."""
-    tgt_len = int(cls.get_tgt_len(avg_len, min_len, max_len))
+    tgt_len = int(cls.get_tgt_len(avg_len, min_len, max_len) + 0.5)
     return cls(tgt_len, min_len, max_len)
 
   @classmethod
@@ -177,50 +190,80 @@ class Chunker(object):
     return "%r: avg_len=%s %s" % (self, self.avg_len, self.stats)
 
 
-class NormChunker(Chunker):
-  """ NormChunker class.
+class WeibullChunker(Chunker):
+  """ WeibullChunker class.
 
-  This uses a chunking probability criteria where the hash is treated as a fixed
-  point number in the range 0.0 -> 1.0 and compared to a probablity of;
+  This uses a chunking probability criteria where the hash is treated as a
+  fixed point number in the range 0.0 -> 1.0 and compared to a slowly
+  increasing probability. The position x is a chunk boundary if h < p where
+  the p "hazard function" is;
 
-  p = 2*(i - min_size)^2 / target_size^3
+  p = M * x^P
 
-  The position i is a chunk boundary if h < p.
+  This gives a Weibull block length distribution. For tgt_len as the mean and
+  P curve power, the Weibull k and L (lambda) parameters, and the resulting M
+  values are;
 
-  The tgt_len for this chunker represents the distribution mode point, not
+  k = P + 1
+  L = tgt_len/gamma(1+1/k)
+  M = k/L^k = b*k
+
+  The tgt_len for this chunker represents the distribution mean, not
   including the effects of min_len and max_len.
+
+  This class uses P=0 which makes it the same as a classic chunker, but
+  subclasses can overide P for different variants.
   """
+  P = 0
 
   @classmethod
   def get_avg_len(cls, tgt_len, min_len, max_len):
-    assert min_len + 2*tgt_len <= max_len
-    return min_len + tgt_len * (3.0/2.0)**(1.0/3.0) * gamma(4.0/3.0)
-
-  @classmethod
-  def get_tgt_len(cls, avg_len, min_len, max_len):
-    assert 2*avg_len - min_len <= max_len
-    return (avg_len - min_len) * ((2.0/3.0)**(1.0/3.0)) / gamma(4.0/3.0)
+    # Getting the average length for the distribution chopped off at 't' is
+    # calculated as follows;
+    #
+    # avg = integ(x*PDF(x), 0, t) + t*(1-CDF(t))
+    # x*PDF(x) = k*(x/L)^k*e^(-(x/L)^k)
+    # t*(1-CDF(t)) = t*e^(-(t/L)^k)
+    # avg = integ(k*(x/L)^k*e^(-(x/L)^k),0,t) + t*e^(-(t/L)^k)
+    #     = L*gammalower(1 + 1/k, (t/L)^k) + t*e^(-(t/L)^k)
+    if tgt_len <= 0:
+      return min_len
+    k = cls.P + 1
+    s = 1.0 + 1.0/k
+    L = tgt_len / gamma(s)
+    t = max_len - min_len
+    z = (t/L)**k
+    return min_len + L * gammalower(s, z) + t*e**(-z)
 
   def reset(self):
-    # self.K = 2**32 * 2.0 / self.tgt_len**3
+    k = self.P + 1
+    L = int(self.tgt_len / gamma(1.0 + 1.0/k))
+    self.M = 2**32 * k / L**k
     # step and incr are an incremental way to calculate p = K * x^2. The initial
     # step for incrementing p is p calculated for x=1, and at each update we
     # increment step by 2x that much. We calculate the increment here since it
     # is fixed, and reset step to half that in initblock().
-    self.incr = 2**32 * 4.0 / self.tgt_len**3
-    super(NormChunker, self).reset()
+    #self.incr = 2**32 * 4.0 / self.tgt_len**3
+    super(WeibullChunker, self).reset()
 
   def initblock(self):
     self.blk_len = 0
     self.prob = 0.0
-    self.step = self.incr / 2.0
+    #self.step = self.incr / 2.0
 
   def incblock(self):
     self.blk_len += 1
-    if self.blk_len > self.min_len:
-      # self.prob = self.K * (self.blk_len - self.min_len)**2
-      self.prob += self.step
-      self.step += self.incr
+    x = self.blk_len - self.min_len
+    if x > 0:
+      self.prob = self.M * x**self.P
+      #self.prob += self.step
+      #self.step += self.incr
+
+class Weibull1Chunker(WeibullChunker):
+  P = 1
+
+class Weibull2Chunker(WeibullChunker):
+  P = 2
 
 
 class FastCDCChunker(Chunker):
@@ -264,23 +307,23 @@ class FastCDCChunker(Chunker):
       self.prob = 2**34 / self.tgt_len
 
 
-class FastNormChunker(NormChunker):
-  """ FastNormChunker class.
+class FastWeibull2Chunker(Weibull2Chunker):
+  """ FastWeibullChunker class.
 
-  This is the same as NormChunker except it aproximates it using integers only
+  This is the same as Weibull2Chunker except it aproximates it using integers only
   to increment prob every dx iterations. This turns out slower in Python, but
   it would almost certainly be a faster in C.
   """
 
   def reset(self):
+    super(FastWeibull2Chunker, self).reset()
     # set default update interval and scaling values. These scaling values ensure
     # that incr is large enough to be accurate (greater than 2^7).
-    dx, incr = 1, (2**32 * 4) / (self.tgt_len**3)
+    dx, incr = 1, 2*self.M
     while incr < 128:
       dx *= 2
-      incr = (2**32 * 4 * dx**2) / (self.tgt_len**3)
+      incr = 2 * self.M * dx**2
     self.incr, self.mask = incr, dx - 1
-    super(FastNormChunker, self).reset()
 
   def initblock(self):
     self.blk_len = 0
@@ -333,7 +376,7 @@ for bavg in (1,2,4,8,16,32,64):
     for bmax in (16, 8, 4, 2):
       bmax = bmax*bavg
       data.reset()
-      chunker = NormChunker.from_avg(bavg, bmin, bmax)
+      chunker = WeibullChunker.from_avg(bavg, bmin, bmax)
       runtest(data, chunker, tsize*bsize)
 
 # Dimensions for graphs;
