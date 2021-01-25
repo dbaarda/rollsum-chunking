@@ -237,7 +237,7 @@ class WeibullChunker(Chunker):
 
   def reset(self):
     k = self.P + 1
-    L = int(self.tgt_len / gamma(1.0 + 1.0/k))
+    L = self.tgt_len / gamma(1.0 + 1.0/k)
     self.M = 2**32 * k / L**k
     # step and incr are an incremental way to calculate p = K * x^2. The initial
     # step for incrementing p is p calculated for x=1, and at each update we
@@ -255,7 +255,7 @@ class WeibullChunker(Chunker):
     self.blk_len += 1
     x = self.blk_len - self.min_len
     if x > 0:
-      self.prob = self.M * x**self.P
+      self.prob = int(self.M * x**self.P)
       #self.prob += self.step
       #self.step += self.incr
 
