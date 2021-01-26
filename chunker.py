@@ -2,10 +2,16 @@
 """
 RollsumChunking modelling.
 
+This will run tests for the specified chunker with different avg/min/max
+length settings.
+
+Usage: %(cmd)s [chunker|weibull0|weibull1|weibull2|fastcdc|fastweibull2]
 """
 from math import *
 from stats1 import Sample
+import os
 import random
+import sys
 
 def solve(f, x0=-1.0e9, x1=1.0e9, e=1.0e-9):
   """ Solve f(x)=0 for x where x0<=x<=x1 within +-e. """
@@ -333,7 +339,7 @@ class FastWeibull2Chunker(Weibull2Chunker):
       self.step += self.incr
 
 
-def runtest(data, chunker, data_len):
+def runtest(chunker, data, data_len):
   blocks = {}
   # Stop after we've read enough data and finished a whole block.
   while data.tot_c < data_len or chunker.blk_len:
@@ -349,18 +355,52 @@ def runtest(data, chunker, data_len):
   print "blocks: tot=%s dup=%s(%4.2f%%)" % ( tot_n, dup_n, 100.0 * dup_n / tot_n)
   print "found: %4.2f%%" % (100.0 * perf)
   print
-  return data.tot_c, data.dup_c, chunker.blkstats, chunker.dupstats, perf
+  return perf, chunker.blkstats, chunker.dupstats
 
 
-tsize=2*1000
-bsize=8*1000
-data = Data(bnum=tsize/2, bsize=bsize, mnum=4)
-for bavg in (1,2,4,8,16,32,64):
-  bavg *= 1024
-  for bmin in (0, 1, 2, 3):
-    bmin *= bavg / 4
-    for bmax in (16, 8, 4, 2):
-      bmax *= bavg
-      data.reset()
-      chunker = Weibull2Chunker.from_avg(bavg, bmin, bmax)
-      runtest(data, chunker, tsize*bsize)
+def tableadd(table, value, *args):
+  # Adds an entry to a nested dict of dicts keyed by the *args.
+  for k in args[0:-1]:
+    table = table.setdefault(k, {})
+  table[args[-1]] = value
+
+
+def alltests(cls, tsize, bsize):
+  """Get results for different avg,min,max chunker args."""
+  results = {}
+  data = Data(bnum=tsize, bsize=bsize, mnum=4)
+  for bavg in (1,2,4,8,16,32,64):
+    bavg_len = bavg * 1024
+    for bmin in (0, 1, 2, 3):
+      bmin_len = bavg_len * bmin / 4
+      for bmax in (16, 8, 4, 2):
+        bmax_len = bavg_len * bmax
+        data.reset()
+        chunker = cls.from_avg(bavg_len, bmin_len, bmax_len)
+        result = runtest(chunker, data, 2*tsize*bsize)
+        tableadd(results, result, bavg, bmin, bmax)
+  return results
+
+
+chunkers = dict(
+    chunker=Chunker,
+    weibull0=WeibullChunker,
+    weibull1=Weibull1Chunker,
+    weibull2=Weibull2Chunker,
+    fastcdc=FastCDCChunker,
+    fastweibull2=FastWeibull2Chunker)
+
+def usage(code, error=None, *args):
+  if error:
+    print error % args
+  print __doc__ % dict(cmd=os.path.basename(sys.argv[0]))
+  sys.exit(code)
+
+if __name__ == '__main__':
+  cmd = sys.argv[1] if len(sys.argv) > 1 else None
+  if cmd in ("-?", "-h", "--help", None):
+    usage(0)
+  if cmd not in chunkers:
+    usage(1, "Error: invalid chunker argument %r.", cmd)
+  cls = chunkers[cmd]
+  alltests(cls, tsize=1000, bsize=8*1000)
