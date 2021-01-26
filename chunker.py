@@ -317,6 +317,8 @@ class FastWeibull2Chunker(Weibull2Chunker):
   """
 
   def reset(self):
+    # Set incr needed by initblock() called by super().
+    self.incr = 0
     super(FastWeibull2Chunker, self).reset()
     # set default update interval and scaling values. These scaling values ensure
     # that incr is large enough to be accurate (greater than 2^7).
@@ -325,6 +327,8 @@ class FastWeibull2Chunker(Weibull2Chunker):
       dx *= 2
       incr = 2 * self.M * dx**2
     self.incr, self.mask = int(incr + 0.5), dx - 1
+    # Call initblock() to initialize again with correctly set incr.
+    self.initblock()
 
   def initblock(self):
     self.blk_len = 0
