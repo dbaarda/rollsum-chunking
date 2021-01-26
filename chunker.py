@@ -7,6 +7,7 @@ length settings.
 
 Usage: %(cmd)s [chunker|weibull0|weibull1|weibull2|fastcdc|fastweibull2]
 """
+from __future__ import print_function
 from math import *
 from stats1 import Sample
 import os
@@ -64,9 +65,9 @@ class Data(object):
     self.seed = seed
     self.dat_p = bsize * bnum # period over which data repeats.
     self.mod_p = bsize * mnum # period over which changes happen.
-    self.mod_o = bsize / 3    # offset at which changes happen.
-    self.del_c = bsize / 7    # bytes deleted each change.
-    self.ins_c = bsize / 5    # bytes inserted each change.
+    self.mod_o = bsize // 3    # offset at which changes happen.
+    self.del_c = bsize // 7    # bytes deleted each change.
+    self.ins_c = bsize // 5    # bytes inserted each change.
     self.mod_e = self.mod_o + self.ins_c
     self.reset()
 
@@ -171,7 +172,7 @@ class Chunker(object):
 
   def initblock(self):
     self.blk_len = 0
-    self.prob = 2**32 / self.tgt_len
+    self.prob = 2**32 // self.tgt_len
 
   def incblock(self):
     self.blk_len += 1
@@ -282,12 +283,12 @@ class FastCDCChunker(Chunker):
   def get_avg_len(cls, tgt_len, min_len, max_len):
     if tgt_len <= min_len:
       # It's the same as Chunker with tgt_len/4.
-      return Chunker.get_avg_len(tgt_len / 4, min_len, max_len)
+      return Chunker.get_avg_len(tgt_len // 4, min_len, max_len)
     if tgt_len >= max_len:
       # It's the same as Chunker with tgt_len*4.
       return Chunker.get_avg_len(tgt_len * 4, min_len, max_len)
     tgt_s = tgt_len * 4
-    tgt_l = tgt_len / 4
+    tgt_l = tgt_len // 4
     s_avg = min_len + tgt_s # avg length of first exponential distribution.
     l_avg = tgt_len + tgt_l # avg length of second exponential distribution.
     s_cut_avg = tgt_len + tgt_s # avg length of first dist cut after tgt_len.
@@ -299,13 +300,13 @@ class FastCDCChunker(Chunker):
   def initblock(self):
     self.blk_len = 0
     # prob is 1/4 of the normal tgt_len probability.
-    self.prob = 2**30 / self.tgt_len
+    self.prob = 2**30 // self.tgt_len
 
   def incblock(self):
     self.blk_len += 1
     if self.blk_len == self.tgt_len:
       # prob is 4x the normal tgt_len probability.
-      self.prob = 2**34 / self.tgt_len
+      self.prob = 2**34 // self.tgt_len
 
 
 class FastWeibull2Chunker(Weibull2Chunker):
@@ -333,7 +334,7 @@ class FastWeibull2Chunker(Weibull2Chunker):
   def initblock(self):
     self.blk_len = 0
     self.prob = 0
-    self.step = self.incr / 2
+    self.step = self.incr // 2
 
   def incblock(self):
     self.blk_len += 1
@@ -349,16 +350,16 @@ def runtest(chunker, data, data_len):
   while data.tot_c < data_len or chunker.blk_len:
     if chunker.isblock(data.getroll()):
       chunker.addblock(data.gethash())
-  print data
-  print chunker
+  print(data)
+  print(chunker)
   assert data.tot_c == chunker.blkstats.sum
   tot_n, dup_n = chunker.blkstats.num, chunker.dupstats.num
   tot_c, dup_c = chunker.blkstats.sum, chunker.dupstats.sum
   perf = float(dup_c) / data.dup_c
-  print "bytes: tot=%s dup=%s(%4.2f%%)" % ( tot_c, dup_c, 100.0 * dup_c / tot_c)
-  print "blocks: tot=%s dup=%s(%4.2f%%)" % ( tot_n, dup_n, 100.0 * dup_n / tot_n)
-  print "found: %4.2f%%" % (100.0 * perf)
-  print
+  print("bytes: tot=%s dup=%s(%4.2f%%)" % ( tot_c, dup_c, 100.0 * dup_c / tot_c))
+  print("blocks: tot=%s dup=%s(%4.2f%%)" % ( tot_n, dup_n, 100.0 * dup_n / tot_n))
+  print("found: %4.2f%%" % (100.0 * perf))
+  print()
   return perf, chunker.blkstats, chunker.dupstats
 
 
@@ -376,7 +377,7 @@ def alltests(cls, tsize, bsize):
   for bavg in (1,2,4,8,16,32,64):
     bavg_len = bavg * 1024
     for bmin in (0, 1, 2, 3):
-      bmin_len = bavg_len * bmin / 4
+      bmin_len = bavg_len * bmin // 4
       for bmax in (16, 8, 4, 2):
         bmax_len = bavg_len * bmax
         data.reset()
@@ -396,8 +397,8 @@ chunkers = dict(
 
 def usage(code, error=None, *args):
   if error:
-    print error % args
-  print __doc__ % dict(cmd=os.path.basename(sys.argv[0]))
+    print(error % args)
+  print(__doc__ % dict(cmd=os.path.basename(sys.argv[0])))
   sys.exit(code)
 
 if __name__ == '__main__':

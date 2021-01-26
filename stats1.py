@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # Data structures and methods for analysis of data.
 
+from __future__ import print_function
 inf = float('inf')
 
 class Sample(object):
@@ -61,4 +62,4 @@ if __name__ == '__main__':
   s = Sample()
   s.add(1.0)
   s.add(2.0)
-  print s
+  print(s)
