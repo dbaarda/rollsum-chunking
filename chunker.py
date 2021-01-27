@@ -87,7 +87,7 @@ class Data(object):
       self.dat.seed(self.seed)
     # After the first dat_p bytes, start making changes.
     if c < self.dat_p:
-      h = self.dat.randrange(2**32)
+      h = self.dat.getrandbits(32)
     else:
       # Set i to the offset past the periodic modify point.
       i = c % self.mod_p
@@ -95,16 +95,16 @@ class Data(object):
       if i == self.mod_o:
         # delete del_c bytes by sucking them out of dat.
         for d in range(self.del_c):
-          self.dat.randrange(2**32)
+          self.dat.getrandbits(32)
         #print "%12d: start replace, del=%d" % (self.tot_c, self.del_c)
       #elif i == self.mod_e:
       #  print "%12d: stop replace, ins=%d" % (self.tot_c, self.ins_c)
       # Between mod_o and mod_e insert new data, otherwise use duplicate data.
       if self.mod_o <= i < self.mod_e:
-        h = self.ins.randrange(2**32)
+        h = self.ins.getrandbits(32)
       else:
         self.dup_c += 1
-        h = self.dat.randrange(2**32)
+        h = self.dat.getrandbits(32)
     self.tot_c += 1
     # update blkh.
     self.blkh = hash((self.blkh, h))
