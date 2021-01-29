@@ -42,7 +42,6 @@ def gammalower(s, z):
     tot += term
   return tot
 
-
 class Data(object):
   """ Data source with rollsums and block hashes.
 
@@ -59,13 +58,19 @@ class Data(object):
   It keeps counts of the number of bytes and duplicate bytes.
   """
 
+  # Pythons random stuff is too slow, so we use a simple good-enough LCG
+  # generator with modulus m = 2^32 for 32 bits. These values come from
+  # Numerical Recipes.
+  a = 1664525  # LCG multiplier value.
+  c = 1013904223  # LCG increment value.
+
   def __init__(self, bsize=1024, bnum=512, mnum=5, seed=1):
     self.bsize = bsize     # block size.
     self.bnum = bnum       # number of blocks before repeating.
     self.mnum = mnum       # number of repeated blocks per change.
     self.seed = seed
-    self.dat_p = bsize * bnum # period over which data repeats.
-    self.mod_p = bsize * mnum # period over which changes happen.
+    self.dat_p = bsize * bnum  # period over which data repeats.
+    self.mod_p = bsize * mnum  # period over which changes happen.
     self.mod_o = bsize // 3    # offset at which changes happen.
     self.del_c = bsize // 7    # bytes deleted each change.
     self.ins_c = bsize // 5    # bytes inserted each change.
@@ -77,18 +82,26 @@ class Data(object):
     self.dup_c = 0         # duplicate bytes scanned.
     self.blkh = 0          # the accumulated whole block hash.
     # Initialize the random generators for the original and inserted data.
-    self.dat = random.Random(self.seed)
-    self.ins = random.Random(self.seed + 6)
+    self.dat = self.seed
+    self.ins = self.seed + 6
+
+  def getdat(self):
+    self.dat = (self.a * self.dat + self.c) & 0xffffffff
+    return self.dat
+
+  def getins(self):
+    self.ins = (self.a * self.ins + self.c) & 0xffffffff
+    return self.ins
 
   def getroll(self):
     """ Get the next rolling hash. """
     c = self.tot_c
     # Start duplicating data every dat_p bytes.
     if (c % self.dat_p) == 0:
-      self.dat.seed(self.seed)
+      self.dat = self.seed
     # After the first dat_p bytes, start making changes.
     if c < self.dat_p:
-      h = self.dat.getrandbits(32)
+      h = self.getdat()
     else:
       # Set i to the offset past the periodic modify point.
       i = c % self.mod_p
@@ -96,16 +109,16 @@ class Data(object):
       if i == self.mod_o:
         # delete del_c bytes by sucking them out of dat.
         for d in range(self.del_c):
-          self.dat.getrandbits(32)
+          self.getdat()
         #print "%12d: start replace, del=%d" % (self.tot_c, self.del_c)
       #elif i == self.mod_e:
       #  print "%12d: stop replace, ins=%d" % (self.tot_c, self.ins_c)
       # Between mod_o and mod_e insert new data, otherwise use duplicate data.
       if self.mod_o <= i < self.mod_e:
-        h = self.ins.getrandbits(32)
+        h = self.getins()
       else:
         self.dup_c += 1
-        h = self.dat.getrandbits(32)
+        h = self.getdat()
     self.tot_c += 1
     # update blkh.
     self.blkh = hash((self.blkh, h))
