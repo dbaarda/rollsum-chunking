@@ -1,4 +1,4 @@
-#!/usr/bin/pypy -O
+#!/usr/bin/pypy3 -O
 """
 RollsumChunking modelling.
 
@@ -11,6 +11,7 @@ from __future__ import print_function
 from math import *
 from stats1 import Sample
 import os
+import pickle
 import random
 import sys
 
@@ -408,4 +409,5 @@ if __name__ == '__main__':
   if cmd not in chunkers:
     usage(1, "Error: invalid chunker argument %r.", cmd)
   cls = chunkers[cmd]
-  alltests(cls, tsize=1000, bsize=8*1000)
+  results = alltests(cls, tsize=1000, bsize=8*1000)
+  pickle.dump(results, open('data/%s.dat' % cmd, 'wb'))
