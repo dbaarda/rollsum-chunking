@@ -1,0 +1,896 @@
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160000669 dup=76000669(47.5%)
+Weibull1Chunker(tgt_len=1024, min_len=0, max_len=16384): avg_len=1024.0
+  blks: num=156596 sum=160000669 min/avg/max/dev=1/1021.7417366982554/3911/535.8250463597014
+  dups: num=70968 sum=71802988 min/avg/max/dev=1/1011.7656972156465/3911/533.137494048935
+bytes: tot=160000669 dup=71802988(44.88%)
+blocks: tot=156596 dup=70968(45.32%)
+found: 94.48%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160000669 dup=76000669(47.5%)
+Weibull1Chunker(tgt_len=1024, min_len=0, max_len=8192): avg_len=1024.0
+  blks: num=156596 sum=160000669 min/avg/max/dev=1/1021.7417366982554/3911/535.8250463597014
+  dups: num=70968 sum=71802988 min/avg/max/dev=1/1011.7656972156465/3911/533.137494048935
+bytes: tot=160000669 dup=71802988(44.88%)
+blocks: tot=156596 dup=70968(45.32%)
+found: 94.48%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160000669 dup=76000669(47.5%)
+Weibull1Chunker(tgt_len=1024, min_len=0, max_len=4096): avg_len=1023.9994486509365
+  blks: num=156596 sum=160000669 min/avg/max/dev=1/1021.7417366982554/3911/535.8250463597014
+  dups: num=70968 sum=71802988 min/avg/max/dev=1/1011.7656972156465/3911/533.137494048935
+bytes: tot=160000669 dup=71802988(44.88%)
+blocks: tot=156596 dup=70968(45.32%)
+found: 94.48%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160000669 dup=76000669(47.5%)
+Weibull1Chunker(tgt_len=1038, min_len=0, max_len=2048): avg_len=1024.0854465295088
+  blks: num=156617 sum=160000669 min/avg/max/dev=1/1021.6047363951551/2048/508.8158914927697
+  dups: num=70676 sum=71578047 min/avg/max/dev=1/1012.7631303412757/2048/508.03832248695386
+bytes: tot=160000669 dup=71578047(44.74%)
+blocks: tot=156617 dup=70676(45.13%)
+found: 94.18%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160000669 dup=76000669(47.5%)
+Weibull1Chunker(tgt_len=768, min_len=256, max_len=16384): avg_len=1024.0
+  blks: num=156254 sum=160000669 min/avg/max/dev=257/1023.9780677614654/3170/402.0742312923889
+  dups: num=70334 sum=71634612 min/avg/max/dev=257/1018.4919384650383/3161/400.95673052643053
+bytes: tot=160000669 dup=71634612(44.77%)
+blocks: tot=156254 dup=70334(45.01%)
+found: 94.26%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160000669 dup=76000669(47.5%)
+Weibull1Chunker(tgt_len=768, min_len=256, max_len=8192): avg_len=1024.0
+  blks: num=156254 sum=160000669 min/avg/max/dev=257/1023.9780677614654/3170/402.0742312923889
+  dups: num=70334 sum=71634612 min/avg/max/dev=257/1018.4919384650383/3161/400.95673052643053
+bytes: tot=160000669 dup=71634612(44.77%)
+blocks: tot=156254 dup=70334(45.01%)
+found: 94.26%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160000669 dup=76000669(47.5%)
+Weibull1Chunker(tgt_len=768, min_len=256, max_len=4096): avg_len=1023.9999992483997
+  blks: num=156254 sum=160000669 min/avg/max/dev=257/1023.9780677614654/3170/402.0742312923889
+  dups: num=70334 sum=71634612 min/avg/max/dev=257/1018.4919384650383/3161/400.95673052643053
+bytes: tot=160000669 dup=71634612(44.77%)
+blocks: tot=156254 dup=70334(45.01%)
+found: 94.26%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160000669 dup=76000669(47.5%)
+Weibull1Chunker(tgt_len=771, min_len=256, max_len=2048): avg_len=1024.2401966949744
+  blks: num=156240 sum=160000669 min/avg/max/dev=257/1024.0698220686124/2048/395.27282917119106
+  dups: num=70224 sum=71536102 min/avg/max/dev=257/1018.6845238095239/2048/394.53745938764115
+bytes: tot=160000669 dup=71536102(44.71%)
+blocks: tot=156240 dup=70224(44.95%)
+found: 94.13%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160000467 dup=76000467(47.5%)
+Weibull1Chunker(tgt_len=512, min_len=512, max_len=16384): avg_len=1024.0
+  blks: num=156148 sum=160000467 min/avg/max/dev=515/1024.6718946128033/2474/268.63041569324315
+  dups: num=68485 sum=70002210 min/avg/max/dev=516/1022.1539023143754/2474/268.19953560961585
+bytes: tot=160000467 dup=70002210(43.75%)
+blocks: tot=156148 dup=68485(43.86%)
+found: 92.11%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160000467 dup=76000467(47.5%)
+Weibull1Chunker(tgt_len=512, min_len=512, max_len=8192): avg_len=1024.0
+  blks: num=156148 sum=160000467 min/avg/max/dev=515/1024.6718946128033/2474/268.63041569324315
+  dups: num=68485 sum=70002210 min/avg/max/dev=516/1022.1539023143754/2474/268.19953560961585
+bytes: tot=160000467 dup=70002210(43.75%)
+blocks: tot=156148 dup=68485(43.86%)
+found: 92.11%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160000467 dup=76000467(47.5%)
+Weibull1Chunker(tgt_len=512, min_len=512, max_len=4096): avg_len=1024.0
+  blks: num=156148 sum=160000467 min/avg/max/dev=515/1024.6718946128033/2474/268.63041569324315
+  dups: num=68485 sum=70002210 min/avg/max/dev=516/1022.1539023143754/2474/268.19953560961585
+bytes: tot=160000467 dup=70002210(43.75%)
+blocks: tot=156148 dup=68485(43.86%)
+found: 92.11%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160000467 dup=76000467(47.5%)
+Weibull1Chunker(tgt_len=512, min_len=512, max_len=2048): avg_len=1023.9129820433701
+  blks: num=156156 sum=160000467 min/avg/max/dev=515/1024.6193998309384/2048/268.25002550846125
+  dups: num=68468 sum=69980377 min/avg/max/dev=516/1022.0888152129462/2048/267.81408207379496
+bytes: tot=160000467 dup=69980377(43.74%)
+blocks: tot=156156 dup=68468(43.85%)
+found: 92.08%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160000835 dup=76000835(47.5%)
+Weibull1Chunker(tgt_len=256, min_len=768, max_len=16384): avg_len=1024.0
+  blks: num=156377 sum=160000835 min/avg/max/dev=769/1023.1737084098045/1764/133.70221372770504
+  dups: num=57013 sum=58281894 min/avg/max/dev=770/1022.2562222650974/1764/133.40044433525077
+bytes: tot=160000835 dup=58281894(36.43%)
+blocks: tot=156377 dup=57013(36.46%)
+found: 76.69%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160000835 dup=76000835(47.5%)
+Weibull1Chunker(tgt_len=256, min_len=768, max_len=8192): avg_len=1024.0
+  blks: num=156377 sum=160000835 min/avg/max/dev=769/1023.1737084098045/1764/133.70221372770504
+  dups: num=57013 sum=58281894 min/avg/max/dev=770/1022.2562222650974/1764/133.40044433525077
+bytes: tot=160000835 dup=58281894(36.43%)
+blocks: tot=156377 dup=57013(36.46%)
+found: 76.69%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160000835 dup=76000835(47.5%)
+Weibull1Chunker(tgt_len=256, min_len=768, max_len=4096): avg_len=1024.0
+  blks: num=156377 sum=160000835 min/avg/max/dev=769/1023.1737084098045/1764/133.70221372770504
+  dups: num=57013 sum=58281894 min/avg/max/dev=770/1022.2562222650974/1764/133.40044433525077
+bytes: tot=160000835 dup=58281894(36.43%)
+blocks: tot=156377 dup=57013(36.46%)
+found: 76.69%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160000835 dup=76000835(47.5%)
+Weibull1Chunker(tgt_len=256, min_len=768, max_len=2048): avg_len=1023.9999997494666
+  blks: num=156377 sum=160000835 min/avg/max/dev=769/1023.1737084098045/1764/133.70221372770504
+  dups: num=57013 sum=58281894 min/avg/max/dev=770/1022.2562222650974/1764/133.40044433525077
+bytes: tot=160000835 dup=58281894(36.43%)
+blocks: tot=156377 dup=57013(36.46%)
+found: 76.69%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=2048, min_len=0, max_len=32768): avg_len=2048.0
+  blks: num=77902 sum=160001638 min/avg/max/dev=12/2053.883571666966/7634/1071.502827175052
+  dups: num=33753 sum=67863671 min/avg/max/dev=12/2010.59671732883/7634/1058.0326786953328
+bytes: tot=160001638 dup=67863671(42.41%)
+blocks: tot=77902 dup=33753(43.33%)
+found: 89.29%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=2048, min_len=0, max_len=16384): avg_len=2048.0
+  blks: num=77902 sum=160001638 min/avg/max/dev=12/2053.883571666966/7634/1071.502827175052
+  dups: num=33753 sum=67863671 min/avg/max/dev=12/2010.59671732883/7634/1058.0326786953328
+bytes: tot=160001638 dup=67863671(42.41%)
+blocks: tot=77902 dup=33753(43.33%)
+found: 89.29%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=2048, min_len=0, max_len=8192): avg_len=2047.998897301873
+  blks: num=77902 sum=160001638 min/avg/max/dev=12/2053.883571666966/7634/1071.502827175052
+  dups: num=33753 sum=67863671 min/avg/max/dev=12/2010.59671732883/7634/1058.0326786953328
+bytes: tot=160001638 dup=67863671(42.41%)
+blocks: tot=77902 dup=33753(43.33%)
+found: 89.29%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=2076, min_len=0, max_len=4096): avg_len=2048.1708930590175
+  blks: num=77903 sum=160001638 min/avg/max/dev=12/2053.8572070395235/4096/1016.8622456420592
+  dups: num=33420 sum=67340100 min/avg/max/dev=12/2014.9640933572712/4096/1011.1794922549176
+bytes: tot=160001638 dup=67340100(42.09%)
+blocks: tot=77903 dup=33420(42.90%)
+found: 88.60%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=1536, min_len=512, max_len=32768): avg_len=2048.0
+  blks: num=78036 sum=160001638 min/avg/max/dev=525/2050.3567327899946/6166/805.9005763475475
+  dups: num=33139 sum=67077456 min/avg/max/dev=525/2024.1243248136636/5820/798.1289071510446
+bytes: tot=160001638 dup=67077456(41.92%)
+blocks: tot=78036 dup=33139(42.47%)
+found: 88.26%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=1536, min_len=512, max_len=16384): avg_len=2048.0
+  blks: num=78036 sum=160001638 min/avg/max/dev=525/2050.3567327899946/6166/805.9005763475475
+  dups: num=33139 sum=67077456 min/avg/max/dev=525/2024.1243248136636/5820/798.1289071510446
+bytes: tot=160001638 dup=67077456(41.92%)
+blocks: tot=78036 dup=33139(42.47%)
+found: 88.26%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=1536, min_len=512, max_len=8192): avg_len=2047.9999984967994
+  blks: num=78036 sum=160001638 min/avg/max/dev=525/2050.3567327899946/6166/805.9005763475475
+  dups: num=33139 sum=67077456 min/avg/max/dev=525/2024.1243248136636/5820/798.1289071510446
+bytes: tot=160001638 dup=67077456(41.92%)
+blocks: tot=78036 dup=33139(42.47%)
+found: 88.26%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=1542, min_len=512, max_len=4096): avg_len=2048.480393389949
+  blks: num=77997 sum=160001638 min/avg/max/dev=525/2051.381950587843/4096/792.9207681207661
+  dups: num=33027 sum=66942765 min/avg/max/dev=525/2026.910255245708/4096/788.2754635897337
+bytes: tot=160001638 dup=66942765(41.84%)
+blocks: tot=77997 dup=33027(42.34%)
+found: 88.08%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=1024, min_len=1024, max_len=32768): avg_len=2048.0
+  blks: num=77965 sum=160001638 min/avg/max/dev=1029/2052.2239209901877/4555/536.0481632345092
+  dups: num=31357 sum=63986984 min/avg/max/dev=1029/2040.596485633192/4533/533.5404716958417
+bytes: tot=160001638 dup=63986984(39.99%)
+blocks: tot=77965 dup=31357(40.22%)
+found: 84.19%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=1024, min_len=1024, max_len=16384): avg_len=2048.0
+  blks: num=77965 sum=160001638 min/avg/max/dev=1029/2052.2239209901877/4555/536.0481632345092
+  dups: num=31357 sum=63986984 min/avg/max/dev=1029/2040.596485633192/4533/533.5404716958417
+bytes: tot=160001638 dup=63986984(39.99%)
+blocks: tot=77965 dup=31357(40.22%)
+found: 84.19%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=1024, min_len=1024, max_len=8192): avg_len=2048.0
+  blks: num=77965 sum=160001638 min/avg/max/dev=1029/2052.2239209901877/4555/536.0481632345092
+  dups: num=31357 sum=63986984 min/avg/max/dev=1029/2040.596485633192/4533/533.5404716958417
+bytes: tot=160001638 dup=63986984(39.99%)
+blocks: tot=77965 dup=31357(40.22%)
+found: 84.19%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=1024, min_len=1024, max_len=4096): avg_len=2047.8259640867402
+  blks: num=77968 sum=160001638 min/avg/max/dev=1029/2052.144956905397/4096/535.5515509738307
+  dups: num=31353 sum=63977890 min/avg/max/dev=1029/2040.5667719197525/4096/532.9913833314249
+bytes: tot=160001638 dup=63977890(39.99%)
+blocks: tot=77968 dup=31353(40.21%)
+found: 84.18%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=512, min_len=1536, max_len=32768): avg_len=2048.0
+  blks: num=78142 sum=160001638 min/avg/max/dev=1537/2047.575413989916/3396/266.69137833553975
+  dups: num=23602 sum=48262558 min/avg/max/dev=1537/2044.850351665113/3396/266.3341196561742
+bytes: tot=160001638 dup=48262558(30.16%)
+blocks: tot=78142 dup=23602(30.20%)
+found: 63.50%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=512, min_len=1536, max_len=16384): avg_len=2048.0
+  blks: num=78142 sum=160001638 min/avg/max/dev=1537/2047.575413989916/3396/266.69137833553975
+  dups: num=23602 sum=48262558 min/avg/max/dev=1537/2044.850351665113/3396/266.3341196561742
+bytes: tot=160001638 dup=48262558(30.16%)
+blocks: tot=78142 dup=23602(30.20%)
+found: 63.50%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=512, min_len=1536, max_len=8192): avg_len=2048.0
+  blks: num=78142 sum=160001638 min/avg/max/dev=1537/2047.575413989916/3396/266.69137833553975
+  dups: num=23602 sum=48262558 min/avg/max/dev=1537/2044.850351665113/3396/266.3341196561742
+bytes: tot=160001638 dup=48262558(30.16%)
+blocks: tot=78142 dup=23602(30.20%)
+found: 63.50%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=512, min_len=1536, max_len=4096): avg_len=2047.9999994989332
+  blks: num=78142 sum=160001638 min/avg/max/dev=1537/2047.575413989916/3396/266.69137833553975
+  dups: num=23602 sum=48262558 min/avg/max/dev=1537/2044.850351665113/3396/266.3341196561742
+bytes: tot=160001638 dup=48262558(30.16%)
+blocks: tot=78142 dup=23602(30.20%)
+found: 63.50%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=4096, min_len=0, max_len=65536): avg_len=4096.0
+  blks: num=39031 sum=160001638 min/avg/max/dev=12/4099.347646742333/14591/2139.635268260988
+  dups: num=15371 sum=60104070 min/avg/max/dev=12/3910.2250992128033/14591/2068.2396340832997
+bytes: tot=160001638 dup=60104070(37.56%)
+blocks: tot=39031 dup=15371(39.38%)
+found: 79.08%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=4096, min_len=0, max_len=32768): avg_len=4096.0
+  blks: num=39031 sum=160001638 min/avg/max/dev=12/4099.347646742333/14591/2139.635268260988
+  dups: num=15371 sum=60104070 min/avg/max/dev=12/3910.2250992128033/14591/2068.2396340832997
+bytes: tot=160001638 dup=60104070(37.56%)
+blocks: tot=39031 dup=15371(39.38%)
+found: 79.08%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=4096, min_len=0, max_len=16384): avg_len=4095.997794603746
+  blks: num=39031 sum=160001638 min/avg/max/dev=12/4099.347646742333/14591/2139.635268260988
+  dups: num=15371 sum=60104070 min/avg/max/dev=12/3910.2250992128033/14591/2068.2396340832997
+bytes: tot=160001638 dup=60104070(37.56%)
+blocks: tot=39031 dup=15371(39.38%)
+found: 79.08%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=4152, min_len=0, max_len=8192): avg_len=4096.341786118035
+  blks: num=39052 sum=160001638 min/avg/max/dev=12/4097.14324490423/8192/2032.285694351898
+  dups: num=15087 sum=59160698 min/avg/max/dev=12/3921.302976072115/8192/1991.8546763023853
+bytes: tot=160001638 dup=59160698(36.98%)
+blocks: tot=39052 dup=15087(38.63%)
+found: 77.84%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=3072, min_len=1024, max_len=65536): avg_len=4096.0
+  blks: num=39000 sum=160001638 min/avg/max/dev=1043/4102.606102564103/11574/1604.2085693650617
+  dups: num=14905 sum=59518004 min/avg/max/dev=1071/3993.156927205636/11030/1563.449255836315
+bytes: tot=160001638 dup=59518004(37.20%)
+blocks: tot=39000 dup=14905(38.22%)
+found: 78.31%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=3072, min_len=1024, max_len=32768): avg_len=4096.0
+  blks: num=39000 sum=160001638 min/avg/max/dev=1043/4102.606102564103/11574/1604.2085693650617
+  dups: num=14905 sum=59518004 min/avg/max/dev=1071/3993.156927205636/11030/1563.449255836315
+bytes: tot=160001638 dup=59518004(37.20%)
+blocks: tot=39000 dup=14905(38.22%)
+found: 78.31%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=3072, min_len=1024, max_len=16384): avg_len=4095.999996993599
+  blks: num=39000 sum=160001638 min/avg/max/dev=1043/4102.606102564103/11574/1604.2085693650617
+  dups: num=14905 sum=59518004 min/avg/max/dev=1071/3993.156927205636/11030/1563.449255836315
+bytes: tot=160001638 dup=59518004(37.20%)
+blocks: tot=39000 dup=14905(38.22%)
+found: 78.31%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=3083, min_len=1024, max_len=8192): avg_len=4095.9977120742406
+  blks: num=38997 sum=160001638 min/avg/max/dev=1043/4102.921711926559/8192/1577.7206590637102
+  dups: num=14775 sum=58999437 min/avg/max/dev=1071/3993.193705583756/8192/1542.2215215385756
+bytes: tot=160001638 dup=58999437(36.87%)
+blocks: tot=38997 dup=14775(37.89%)
+found: 77.63%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=2048, min_len=2048, max_len=65536): avg_len=4096.0
+  blks: num=39080 sum=160001638 min/avg/max/dev=2060/4094.2077277379735/9542/1066.0988345444566
+  dups: num=13822 sum=55819103 min/avg/max/dev=2060/4038.424468239039/9315/1047.903936372192
+bytes: tot=160001638 dup=55819103(34.89%)
+blocks: tot=39080 dup=13822(35.37%)
+found: 73.44%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=2048, min_len=2048, max_len=32768): avg_len=4096.0
+  blks: num=39080 sum=160001638 min/avg/max/dev=2060/4094.2077277379735/9542/1066.0988345444566
+  dups: num=13822 sum=55819103 min/avg/max/dev=2060/4038.424468239039/9315/1047.903936372192
+bytes: tot=160001638 dup=55819103(34.89%)
+blocks: tot=39080 dup=13822(35.37%)
+found: 73.44%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=2048, min_len=2048, max_len=16384): avg_len=4096.0
+  blks: num=39080 sum=160001638 min/avg/max/dev=2060/4094.2077277379735/9542/1066.0988345444566
+  dups: num=13822 sum=55819103 min/avg/max/dev=2060/4038.424468239039/9315/1047.903936372192
+bytes: tot=160001638 dup=55819103(34.89%)
+blocks: tot=39080 dup=13822(35.37%)
+found: 73.44%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=2048, min_len=2048, max_len=8192): avg_len=4095.6519281734804
+  blks: num=39081 sum=160001638 min/avg/max/dev=2060/4094.102965635475/8192/1065.326101845996
+  dups: num=13812 sum=55772347 min/avg/max/dev=2060/4037.9631479872573/8192/1047.1592033728177
+bytes: tot=160001638 dup=55772347(34.86%)
+blocks: tot=39081 dup=13812(35.34%)
+found: 73.38%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160000669 dup=76000669(47.5%)
+Weibull1Chunker(tgt_len=1024, min_len=3072, max_len=65536): avg_len=4096.0
+  blks: num=38998 sum=160000669 min/avg/max/dev=3082/4102.791655982358/6592/536.0382949942231
+  dups: num=10319 sum=42174748 min/avg/max/dev=3082/4087.0964240721/6535/534.8655590901406
+bytes: tot=160000669 dup=42174748(26.36%)
+blocks: tot=38998 dup=10319(26.46%)
+found: 55.49%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160000669 dup=76000669(47.5%)
+Weibull1Chunker(tgt_len=1024, min_len=3072, max_len=32768): avg_len=4096.0
+  blks: num=38998 sum=160000669 min/avg/max/dev=3082/4102.791655982358/6592/536.0382949942231
+  dups: num=10319 sum=42174748 min/avg/max/dev=3082/4087.0964240721/6535/534.8655590901406
+bytes: tot=160000669 dup=42174748(26.36%)
+blocks: tot=38998 dup=10319(26.46%)
+found: 55.49%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160000669 dup=76000669(47.5%)
+Weibull1Chunker(tgt_len=1024, min_len=3072, max_len=16384): avg_len=4096.0
+  blks: num=38998 sum=160000669 min/avg/max/dev=3082/4102.791655982358/6592/536.0382949942231
+  dups: num=10319 sum=42174748 min/avg/max/dev=3082/4087.0964240721/6535/534.8655590901406
+bytes: tot=160000669 dup=42174748(26.36%)
+blocks: tot=38998 dup=10319(26.46%)
+found: 55.49%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160000669 dup=76000669(47.5%)
+Weibull1Chunker(tgt_len=1024, min_len=3072, max_len=8192): avg_len=4095.9999989978664
+  blks: num=38998 sum=160000669 min/avg/max/dev=3082/4102.791655982358/6592/536.0382949942231
+  dups: num=10319 sum=42174748 min/avg/max/dev=3082/4087.0964240721/6535/534.8655590901406
+bytes: tot=160000669 dup=42174748(26.36%)
+blocks: tot=38998 dup=10319(26.46%)
+found: 55.49%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=8192, min_len=0, max_len=131072): avg_len=8192.0
+  blks: num=19544 sum=160001638 min/avg/max/dev=147/8186.739562013918/29403/4253.634909465006
+  dups: num=6385 sum=46736934 min/avg/max/dev=147/7319.801722787784/26954/3901.858318321398
+bytes: tot=160001638 dup=46736934(29.21%)
+blocks: tot=19544 dup=6385(32.67%)
+found: 61.49%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=8192, min_len=0, max_len=65536): avg_len=8192.0
+  blks: num=19544 sum=160001638 min/avg/max/dev=147/8186.739562013918/29403/4253.634909465006
+  dups: num=6385 sum=46736934 min/avg/max/dev=147/7319.801722787784/26954/3901.858318321398
+bytes: tot=160001638 dup=46736934(29.21%)
+blocks: tot=19544 dup=6385(32.67%)
+found: 61.49%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=8192, min_len=0, max_len=32768): avg_len=8191.995589207492
+  blks: num=19544 sum=160001638 min/avg/max/dev=147/8186.739562013918/29403/4253.634909465006
+  dups: num=6385 sum=46736934 min/avg/max/dev=147/7319.801722787784/26954/3901.858318321398
+bytes: tot=160001638 dup=46736934(29.21%)
+blocks: tot=19544 dup=6385(32.67%)
+found: 61.49%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=8303, min_len=0, max_len=16384): avg_len=8191.789692835199
+  blks: num=19511 sum=160001638 min/avg/max/dev=147/8200.586233406797/16384/4053.4444790033563
+  dups: num=6112 sum=45124146 min/avg/max/dev=147/7382.877290575916/16384/3850.953402128004
+bytes: tot=160001638 dup=45124146(28.20%)
+blocks: tot=19511 dup=6112(31.33%)
+found: 59.37%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=6144, min_len=2048, max_len=131072): avg_len=8192.0
+  blks: num=19480 sum=160001638 min/avg/max/dev=2053/8213.636447638604/26670/3189.2417196846523
+  dups: num=6058 sum=46547957 min/avg/max/dev=2053/7683.716903268405/20778/2962.156890001833
+bytes: tot=160001638 dup=46547957(29.09%)
+blocks: tot=19480 dup=6058(31.10%)
+found: 61.25%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=6144, min_len=2048, max_len=65536): avg_len=8192.0
+  blks: num=19480 sum=160001638 min/avg/max/dev=2053/8213.636447638604/26670/3189.2417196846523
+  dups: num=6058 sum=46547957 min/avg/max/dev=2053/7683.716903268405/20778/2962.156890001833
+bytes: tot=160001638 dup=46547957(29.09%)
+blocks: tot=19480 dup=6058(31.10%)
+found: 61.25%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=6144, min_len=2048, max_len=32768): avg_len=8191.999993987198
+  blks: num=19480 sum=160001638 min/avg/max/dev=2053/8213.636447638604/26670/3189.2417196846523
+  dups: num=6058 sum=46547957 min/avg/max/dev=2053/7683.716903268405/20778/2962.156890001833
+bytes: tot=160001638 dup=46547957(29.09%)
+blocks: tot=19480 dup=6058(31.10%)
+found: 61.25%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=6166, min_len=2048, max_len=16384): avg_len=8191.995424148481
+  blks: num=19466 sum=160001638 min/avg/max/dev=2053/8219.54371725059/16384/3137.853927967473
+  dups: num=5990 sum=46155694 min/avg/max/dev=2053/7705.458096828047/16384/2956.727584483414
+bytes: tot=160001638 dup=46155694(28.85%)
+blocks: tot=19466 dup=5990(30.77%)
+found: 60.73%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160005240 dup=76003640(47.5%)
+Weibull1Chunker(tgt_len=4096, min_len=4096, max_len=131072): avg_len=8192.0
+  blks: num=19486 sum=160005240 min/avg/max/dev=4151/8211.292209791645/18500/2146.428504243808
+  dups: num=5495 sum=43663738 min/avg/max/dev=4200/7946.08516833485/17420/2052.9639048376357
+bytes: tot=160005240 dup=43663738(27.29%)
+blocks: tot=19486 dup=5495(28.20%)
+found: 57.45%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160005240 dup=76003640(47.5%)
+Weibull1Chunker(tgt_len=4096, min_len=4096, max_len=65536): avg_len=8192.0
+  blks: num=19486 sum=160005240 min/avg/max/dev=4151/8211.292209791645/18500/2146.428504243808
+  dups: num=5495 sum=43663738 min/avg/max/dev=4200/7946.08516833485/17420/2052.9639048376357
+bytes: tot=160005240 dup=43663738(27.29%)
+blocks: tot=19486 dup=5495(28.20%)
+found: 57.45%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160005240 dup=76003640(47.5%)
+Weibull1Chunker(tgt_len=4096, min_len=4096, max_len=32768): avg_len=8192.0
+  blks: num=19486 sum=160005240 min/avg/max/dev=4151/8211.292209791645/18500/2146.428504243808
+  dups: num=5495 sum=43663738 min/avg/max/dev=4200/7946.08516833485/17420/2052.9639048376357
+bytes: tot=160005240 dup=43663738(27.29%)
+blocks: tot=19486 dup=5495(28.20%)
+found: 57.45%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160005240 dup=76003640(47.5%)
+Weibull1Chunker(tgt_len=4097, min_len=4096, max_len=16384): avg_len=8192.301127847973
+  blks: num=19486 sum=160005240 min/avg/max/dev=4151/8211.292209791645/16384/2143.1201218131587
+  dups: num=5502 sum=43726662 min/avg/max/dev=4200/7947.412213740458/16384/2052.2139629190733
+bytes: tot=160005240 dup=43726662(27.33%)
+blocks: tot=19486 dup=5502(28.24%)
+found: 57.53%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=2048, min_len=6144, max_len=131072): avg_len=8192.0
+  blks: num=19516 sum=160001638 min/avg/max/dev=6151/8198.48524287764/13081/1069.033882164125
+  dups: num=4059 sum=33071804 min/avg/max/dev=6151/8147.771372259177/13081/1058.5374101049238
+bytes: tot=160001638 dup=33071804(20.67%)
+blocks: tot=19516 dup=4059(20.80%)
+found: 43.51%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=2048, min_len=6144, max_len=65536): avg_len=8192.0
+  blks: num=19516 sum=160001638 min/avg/max/dev=6151/8198.48524287764/13081/1069.033882164125
+  dups: num=4059 sum=33071804 min/avg/max/dev=6151/8147.771372259177/13081/1058.5374101049238
+bytes: tot=160001638 dup=33071804(20.67%)
+blocks: tot=19516 dup=4059(20.80%)
+found: 43.51%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=2048, min_len=6144, max_len=32768): avg_len=8192.0
+  blks: num=19516 sum=160001638 min/avg/max/dev=6151/8198.48524287764/13081/1069.033882164125
+  dups: num=4059 sum=33071804 min/avg/max/dev=6151/8147.771372259177/13081/1058.5374101049238
+bytes: tot=160001638 dup=33071804(20.67%)
+blocks: tot=19516 dup=4059(20.80%)
+found: 43.51%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=2048, min_len=6144, max_len=16384): avg_len=8191.999997995733
+  blks: num=19516 sum=160001638 min/avg/max/dev=6151/8198.48524287764/13081/1069.033882164125
+  dups: num=4059 sum=33071804 min/avg/max/dev=6151/8147.771372259177/13081/1058.5374101049238
+bytes: tot=160001638 dup=33071804(20.67%)
+blocks: tot=19516 dup=4059(20.80%)
+found: 43.51%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=16384, min_len=0, max_len=262144): avg_len=16384.0
+  blks: num=9780 sum=160001638 min/avg/max/dev=147/16360.085685071575/54037/8461.721124884496
+  dups: num=2025 sum=23808632 min/avg/max/dev=147/11757.34913580247/30156/5982.493733898005
+bytes: tot=160001638 dup=23808632(14.88%)
+blocks: tot=9780 dup=2025(20.71%)
+found: 31.33%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=16384, min_len=0, max_len=131072): avg_len=16384.0
+  blks: num=9780 sum=160001638 min/avg/max/dev=147/16360.085685071575/54037/8461.721124884496
+  dups: num=2025 sum=23808632 min/avg/max/dev=147/11757.34913580247/30156/5982.493733898005
+bytes: tot=160001638 dup=23808632(14.88%)
+blocks: tot=9780 dup=2025(20.71%)
+found: 31.33%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=16384, min_len=0, max_len=65536): avg_len=16383.991178414984
+  blks: num=9780 sum=160001638 min/avg/max/dev=147/16360.085685071575/54037/8461.721124884496
+  dups: num=2025 sum=23808632 min/avg/max/dev=147/11757.34913580247/30156/5982.493733898005
+bytes: tot=160001638 dup=23808632(14.88%)
+blocks: tot=9780 dup=2025(20.71%)
+found: 31.33%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=16606, min_len=0, max_len=32768): avg_len=16383.579385670399
+  blks: num=9779 sum=160001638 min/avg/max/dev=147/16361.75866653032/32768/8101.751419630987
+  dups: num=1914 sum=22672336 min/avg/max/dev=147/11845.525600835947/30156/6006.168691408698
+bytes: tot=160001638 dup=22672336(14.17%)
+blocks: tot=9779 dup=1914(19.57%)
+found: 29.83%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=12288, min_len=4096, max_len=262144): avg_len=16384.0
+  blks: num=9770 sum=160001638 min/avg/max/dev=4332/16376.830910951894/48187/6407.405951498178
+  dups: num=1915 sum=25733494 min/avg/max/dev=4332/13437.855874673629/29648/4830.034276631125
+bytes: tot=160001638 dup=25733494(16.08%)
+blocks: tot=9770 dup=1915(19.60%)
+found: 33.86%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=12288, min_len=4096, max_len=131072): avg_len=16384.0
+  blks: num=9770 sum=160001638 min/avg/max/dev=4332/16376.830910951894/48187/6407.405951498178
+  dups: num=1915 sum=25733494 min/avg/max/dev=4332/13437.855874673629/29648/4830.034276631125
+bytes: tot=160001638 dup=25733494(16.08%)
+blocks: tot=9770 dup=1915(19.60%)
+found: 33.86%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=12288, min_len=4096, max_len=65536): avg_len=16383.999987974395
+  blks: num=9770 sum=160001638 min/avg/max/dev=4332/16376.830910951894/48187/6407.405951498178
+  dups: num=1915 sum=25733494 min/avg/max/dev=4332/13437.855874673629/29648/4830.034276631125
+bytes: tot=160001638 dup=25733494(16.08%)
+blocks: tot=9770 dup=1915(19.60%)
+found: 33.86%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=12332, min_len=4096, max_len=32768): avg_len=16383.990848296962
+  blks: num=9776 sum=160001638 min/avg/max/dev=4332/16366.779664484451/32768/6292.899512277637
+  dups: num=1880 sum=25318381 min/avg/max/dev=4332/13467.223936170212/29648/4860.160549112599
+bytes: tot=160001638 dup=25318381(15.82%)
+blocks: tot=9776 dup=1880(19.23%)
+found: 33.31%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=8192, min_len=8192, max_len=262144): avg_len=16384.0
+  blks: num=9742 sum=160001638 min/avg/max/dev=8346/16423.900431122973/33976/4301.010927384014
+  dups: num=1723 sum=25748929 min/avg/max/dev=8346/14944.242019733023/29293/3519.0338318546364
+bytes: tot=160001638 dup=25748929(16.09%)
+blocks: tot=9742 dup=1723(17.69%)
+found: 33.88%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=8192, min_len=8192, max_len=131072): avg_len=16384.0
+  blks: num=9742 sum=160001638 min/avg/max/dev=8346/16423.900431122973/33976/4301.010927384014
+  dups: num=1723 sum=25748929 min/avg/max/dev=8346/14944.242019733023/29293/3519.0338318546364
+bytes: tot=160001638 dup=25748929(16.09%)
+blocks: tot=9742 dup=1723(17.69%)
+found: 33.88%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=8192, min_len=8192, max_len=65536): avg_len=16384.0
+  blks: num=9742 sum=160001638 min/avg/max/dev=8346/16423.900431122973/33976/4301.010927384014
+  dups: num=1723 sum=25748929 min/avg/max/dev=8346/14944.242019733023/29293/3519.0338318546364
+bytes: tot=160001638 dup=25748929(16.09%)
+blocks: tot=9742 dup=1723(17.69%)
+found: 33.88%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=8193, min_len=8192, max_len=32768): avg_len=16383.60498640214
+  blks: num=9741 sum=160001638 min/avg/max/dev=8346/16425.58649009342/32768/4299.899276560091
+  dups: num=1723 sum=25748929 min/avg/max/dev=8346/14944.242019733023/29293/3519.0338318546364
+bytes: tot=160001638 dup=25748929(16.09%)
+blocks: tot=9741 dup=1723(17.69%)
+found: 33.88%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=4096, min_len=12288, max_len=262144): avg_len=16384.0
+  blks: num=9750 sum=160001638 min/avg/max/dev=12302/16410.42441025641/26638/2141.4259220121753
+  dups: num=1284 sum=20569422 min/avg/max/dev=12302/16019.79906542056/24470/1931.6678285389048
+bytes: tot=160001638 dup=20569422(12.86%)
+blocks: tot=9750 dup=1284(13.17%)
+found: 27.06%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=4096, min_len=12288, max_len=131072): avg_len=16384.0
+  blks: num=9750 sum=160001638 min/avg/max/dev=12302/16410.42441025641/26638/2141.4259220121753
+  dups: num=1284 sum=20569422 min/avg/max/dev=12302/16019.79906542056/24470/1931.6678285389048
+bytes: tot=160001638 dup=20569422(12.86%)
+blocks: tot=9750 dup=1284(13.17%)
+found: 27.06%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=4096, min_len=12288, max_len=65536): avg_len=16384.0
+  blks: num=9750 sum=160001638 min/avg/max/dev=12302/16410.42441025641/26638/2141.4259220121753
+  dups: num=1284 sum=20569422 min/avg/max/dev=12302/16019.79906542056/24470/1931.6678285389048
+bytes: tot=160001638 dup=20569422(12.86%)
+blocks: tot=9750 dup=1284(13.17%)
+found: 27.06%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=4096, min_len=12288, max_len=32768): avg_len=16383.999995991466
+  blks: num=9750 sum=160001638 min/avg/max/dev=12302/16410.42441025641/26638/2141.4259220121753
+  dups: num=1284 sum=20569422 min/avg/max/dev=12302/16019.79906542056/24470/1931.6678285389048
+bytes: tot=160001638 dup=20569422(12.86%)
+blocks: tot=9750 dup=1284(13.17%)
+found: 27.06%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=32768, min_len=0, max_len=524288): avg_len=32768.0
+  blks: num=4862 sum=160001638 min/avg/max/dev=686/32908.60510078157/125748/17255.25178000365
+  dups: num=400 sum=5709184 min/avg/max/dev=1363/14272.96/30156/6633.02895654768
+bytes: tot=160001638 dup=5709184(3.57%)
+blocks: tot=4862 dup=400(8.23%)
+found: 7.51%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=32768, min_len=0, max_len=262144): avg_len=32768.0
+  blks: num=4862 sum=160001638 min/avg/max/dev=686/32908.60510078157/125748/17255.25178000365
+  dups: num=400 sum=5709184 min/avg/max/dev=1363/14272.96/30156/6633.02895654768
+bytes: tot=160001638 dup=5709184(3.57%)
+blocks: tot=4862 dup=400(8.23%)
+found: 7.51%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=32768, min_len=0, max_len=131072): avg_len=32767.98235682997
+  blks: num=4862 sum=160001638 min/avg/max/dev=686/32908.60510078157/125748/17255.25178000365
+  dups: num=400 sum=5709184 min/avg/max/dev=1363/14272.96/30156/6633.02895654768
+bytes: tot=160001638 dup=5709184(3.57%)
+blocks: tot=4862 dup=400(8.23%)
+found: 7.51%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=33213, min_len=0, max_len=65536): avg_len=32768.05267634974
+  blks: num=4864 sum=160001638 min/avg/max/dev=686/32895.07360197369/65536/16293.978690704089
+  dups: num=376 sum=5385360 min/avg/max/dev=1363/14322.765957446809/30156/6695.467323838253
+bytes: tot=160001638 dup=5385360(3.37%)
+blocks: tot=4864 dup=376(7.73%)
+found: 7.09%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=24576, min_len=8192, max_len=524288): avg_len=32768.0
+  blks: num=4843 sum=160001638 min/avg/max/dev=8598/33037.711748915965/85720/12993.445361985092
+  dups: num=251 sum=4674570 min/avg/max/dev=8598/18623.784860557767/30156/4985.530893332866
+bytes: tot=160001638 dup=4674570(2.92%)
+blocks: tot=4843 dup=251(5.18%)
+found: 6.15%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=24576, min_len=8192, max_len=262144): avg_len=32768.0
+  blks: num=4843 sum=160001638 min/avg/max/dev=8598/33037.711748915965/85720/12993.445361985092
+  dups: num=251 sum=4674570 min/avg/max/dev=8598/18623.784860557767/30156/4985.530893332866
+bytes: tot=160001638 dup=4674570(2.92%)
+blocks: tot=4843 dup=251(5.18%)
+found: 6.15%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=24576, min_len=8192, max_len=131072): avg_len=32767.99997594879
+  blks: num=4843 sum=160001638 min/avg/max/dev=8598/33037.711748915965/85720/12993.445361985092
+  dups: num=251 sum=4674570 min/avg/max/dev=8598/18623.784860557767/30156/4985.530893332866
+bytes: tot=160001638 dup=4674570(2.92%)
+blocks: tot=4843 dup=251(5.18%)
+found: 6.15%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=24664, min_len=8192, max_len=65536): avg_len=32767.981696593924
+  blks: num=4840 sum=160001638 min/avg/max/dev=8598/33058.18966942149/65536/12717.30066034114
+  dups: num=244 sum=4527020 min/avg/max/dev=8598/18553.360655737706/30156/4985.894912134178
+bytes: tot=160001638 dup=4527020(2.83%)
+blocks: tot=4840 dup=244(5.04%)
+found: 5.96%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=16384, min_len=16384, max_len=524288): avg_len=32768.0
+  blks: num=4884 sum=160001638 min/avg/max/dev=16654/32760.36814086814/81673/8381.179688403327
+  dups: num=135 sum=3111271 min/avg/max/dev=17497/23046.451851851853/30156/2892.235807502617
+bytes: tot=160001638 dup=3111271(1.94%)
+blocks: tot=4884 dup=135(2.76%)
+found: 4.09%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=16384, min_len=16384, max_len=262144): avg_len=32768.0
+  blks: num=4884 sum=160001638 min/avg/max/dev=16654/32760.36814086814/81673/8381.179688403327
+  dups: num=135 sum=3111271 min/avg/max/dev=17497/23046.451851851853/30156/2892.235807502617
+bytes: tot=160001638 dup=3111271(1.94%)
+blocks: tot=4884 dup=135(2.76%)
+found: 4.09%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=16384, min_len=16384, max_len=131072): avg_len=32768.0
+  blks: num=4884 sum=160001638 min/avg/max/dev=16654/32760.36814086814/81673/8381.179688403327
+  dups: num=135 sum=3111271 min/avg/max/dev=17497/23046.451851851853/30156/2892.235807502617
+bytes: tot=160001638 dup=3111271(1.94%)
+blocks: tot=4884 dup=135(2.76%)
+found: 4.09%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=16387, min_len=16384, max_len=65536): avg_len=32768.20724320237
+  blks: num=4884 sum=160001638 min/avg/max/dev=16654/32760.36814086814/65536/8350.383540555624
+  dups: num=135 sum=3111271 min/avg/max/dev=17497/23046.451851851853/30156/2892.235807502617
+bytes: tot=160001638 dup=3111271(1.94%)
+blocks: tot=4884 dup=135(2.76%)
+found: 4.09%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=8192, min_len=24576, max_len=524288): avg_len=32768.0
+  blks: num=4892 sum=160001638 min/avg/max/dev=24631/32706.794358135732/49796/4197.2675519828435
+  dups: num=25 sum=682233 min/avg/max/dev=24855/27289.32/30156/1596.2484949405418
+bytes: tot=160001638 dup=682233(0.43%)
+blocks: tot=4892 dup=25(0.51%)
+found: 0.90%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=8192, min_len=24576, max_len=262144): avg_len=32768.0
+  blks: num=4892 sum=160001638 min/avg/max/dev=24631/32706.794358135732/49796/4197.2675519828435
+  dups: num=25 sum=682233 min/avg/max/dev=24855/27289.32/30156/1596.2484949405418
+bytes: tot=160001638 dup=682233(0.43%)
+blocks: tot=4892 dup=25(0.51%)
+found: 0.90%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=8192, min_len=24576, max_len=131072): avg_len=32768.0
+  blks: num=4892 sum=160001638 min/avg/max/dev=24631/32706.794358135732/49796/4197.2675519828435
+  dups: num=25 sum=682233 min/avg/max/dev=24855/27289.32/30156/1596.2484949405418
+bytes: tot=160001638 dup=682233(0.43%)
+blocks: tot=4892 dup=25(0.51%)
+found: 0.90%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=8192, min_len=24576, max_len=65536): avg_len=32767.99999198293
+  blks: num=4892 sum=160001638 min/avg/max/dev=24631/32706.794358135732/49796/4197.2675519828435
+  dups: num=25 sum=682233 min/avg/max/dev=24855/27289.32/30156/1596.2484949405418
+bytes: tot=160001638 dup=682233(0.43%)
+blocks: tot=4892 dup=25(0.51%)
+found: 0.90%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=65536, min_len=0, max_len=1048576): avg_len=65536.0
+  blks: num=2475 sum=160001638 min/avg/max/dev=2053/64647.12646464646/245115/34959.92760918363
+  dups: num=67 sum=981682 min/avg/max/dev=2053/14651.970149253732/27540/6278.0946605059335
+bytes: tot=160001638 dup=981682(0.61%)
+blocks: tot=2475 dup=67(2.71%)
+found: 1.29%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=65536, min_len=0, max_len=524288): avg_len=65536.0
+  blks: num=2475 sum=160001638 min/avg/max/dev=2053/64647.12646464646/245115/34959.92760918363
+  dups: num=67 sum=981682 min/avg/max/dev=2053/14651.970149253732/27540/6278.0946605059335
+bytes: tot=160001638 dup=981682(0.61%)
+blocks: tot=2475 dup=67(2.71%)
+found: 1.29%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=65536, min_len=0, max_len=262144): avg_len=65535.96471365994
+  blks: num=2475 sum=160001638 min/avg/max/dev=2053/64647.12646464646/245115/34959.92760918363
+  dups: num=67 sum=981682 min/avg/max/dev=2053/14651.970149253732/27540/6278.0946605059335
+bytes: tot=160001638 dup=981682(0.61%)
+blocks: tot=2475 dup=67(2.71%)
+found: 1.29%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=66426, min_len=0, max_len=131072): avg_len=65536.10535269948
+  blks: num=2467 sum=160001638 min/avg/max/dev=1618/64856.764491284965/131072/33113.76002064049
+  dups: num=61 sum=863344 min/avg/max/dev=2053/14153.180327868853/27540/6398.984305951198
+bytes: tot=160001638 dup=863344(0.54%)
+blocks: tot=2467 dup=61(2.47%)
+found: 1.14%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=49152, min_len=16384, max_len=1048576): avg_len=65536.0
+  blks: num=2445 sum=160001638 min/avg/max/dev=18089/65440.3427402863/180121/25676.59114609562
+  dups: num=5 sum=115846 min/avg/max/dev=19922/23169.2/27540/2809.927785548952
+bytes: tot=160001638 dup=115846(0.07%)
+blocks: tot=2445 dup=5(0.20%)
+found: 0.15%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=49152, min_len=16384, max_len=524288): avg_len=65536.0
+  blks: num=2445 sum=160001638 min/avg/max/dev=18089/65440.3427402863/180121/25676.59114609562
+  dups: num=5 sum=115846 min/avg/max/dev=19922/23169.2/27540/2809.927785548952
+bytes: tot=160001638 dup=115846(0.07%)
+blocks: tot=2445 dup=5(0.20%)
+found: 0.15%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=49152, min_len=16384, max_len=262144): avg_len=65535.99995189758
+  blks: num=2445 sum=160001638 min/avg/max/dev=18089/65440.3427402863/180121/25676.59114609562
+  dups: num=5 sum=115846 min/avg/max/dev=19922/23169.2/27540/2809.927785548952
+bytes: tot=160001638 dup=115846(0.07%)
+blocks: tot=2445 dup=5(0.20%)
+found: 0.15%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=49328, min_len=16384, max_len=131072): avg_len=65535.96339318785
+  blks: num=2449 sum=160001638 min/avg/max/dev=18089/65333.457737852186/131072/25216.700880843924
+  dups: num=5 sum=115846 min/avg/max/dev=19922/23169.2/27540/2809.927785548952
+bytes: tot=160001638 dup=115846(0.07%)
+blocks: tot=2449 dup=5(0.20%)
+found: 0.15%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=32768, min_len=32768, max_len=1048576): avg_len=65536.0
+  blks: num=2443 sum=160001638 min/avg/max/dev=33357/65493.91649611134/140889/17613.263585171797
+  dups: num=0 sum=0
+bytes: tot=160001638 dup=0(0.00%)
+blocks: tot=2443 dup=0(0.00%)
+found: 0.00%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=32768, min_len=32768, max_len=524288): avg_len=65536.0
+  blks: num=2443 sum=160001638 min/avg/max/dev=33357/65493.91649611134/140889/17613.263585171797
+  dups: num=0 sum=0
+bytes: tot=160001638 dup=0(0.00%)
+blocks: tot=2443 dup=0(0.00%)
+found: 0.00%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=32768, min_len=32768, max_len=262144): avg_len=65536.0
+  blks: num=2443 sum=160001638 min/avg/max/dev=33357/65493.91649611134/140889/17613.263585171797
+  dups: num=0 sum=0
+bytes: tot=160001638 dup=0(0.00%)
+blocks: tot=2443 dup=0(0.00%)
+found: 0.00%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=32774, min_len=32768, max_len=131072): avg_len=65536.41448640474
+  blks: num=2445 sum=160001638 min/avg/max/dev=33357/65440.3427402863/131072/17582.031128396724
+  dups: num=0 sum=0
+bytes: tot=160001638 dup=0(0.00%)
+blocks: tot=2445 dup=0(0.00%)
+found: 0.00%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=16384, min_len=49152, max_len=1048576): avg_len=65536.0
+  blks: num=2437 sum=160001638 min/avg/max/dev=49439/65655.16536725483/107158/8557.54362270364
+  dups: num=0 sum=0
+bytes: tot=160001638 dup=0(0.00%)
+blocks: tot=2437 dup=0(0.00%)
+found: 0.00%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=16384, min_len=49152, max_len=524288): avg_len=65536.0
+  blks: num=2437 sum=160001638 min/avg/max/dev=49439/65655.16536725483/107158/8557.54362270364
+  dups: num=0 sum=0
+bytes: tot=160001638 dup=0(0.00%)
+blocks: tot=2437 dup=0(0.00%)
+found: 0.00%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=16384, min_len=49152, max_len=262144): avg_len=65536.0
+  blks: num=2437 sum=160001638 min/avg/max/dev=49439/65655.16536725483/107158/8557.54362270364
+  dups: num=0 sum=0
+bytes: tot=160001638 dup=0(0.00%)
+blocks: tot=2437 dup=0(0.00%)
+found: 0.00%
+
+Data(bsize=8000, bnum=10000, mnum=4, seed=1): tot=160001638 dup=76001638(47.5%)
+Weibull1Chunker(tgt_len=16384, min_len=49152, max_len=131072): avg_len=65535.99998396586
+  blks: num=2437 sum=160001638 min/avg/max/dev=49439/65655.16536725483/107158/8557.54362270364
+  dups: num=0 sum=0
+bytes: tot=160001638 dup=0(0.00%)
+blocks: tot=2437 dup=0(0.00%)
+found: 0.00%
+
