@@ -422,5 +422,5 @@ if __name__ == '__main__':
   if cmd not in chunkers:
     usage(1, "Error: invalid chunker argument %r.", cmd)
   cls = chunkers[cmd]
-  results = alltests(cls, tsize=1000, bsize=8*1000)
+  results = alltests(cls, tsize=10000, bsize=8*1000)
   pickle.dump(results, open('data/%s.dat' % cmd, 'wb'))

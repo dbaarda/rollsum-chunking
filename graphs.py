@@ -143,8 +143,8 @@ def PerfVsAvgSize(data, min, max):
     plt.plot(xs, perfs, label="alg=%s" % alg)
   ax = plt.gca()
   ax.set_ylim(bottom=0)
-  ax.set_xlim(left=0, right=xs[-1])
-  #plt.xscale('log')
+  #ax.set_xlim(left=0, right=xs[-1])
+  plt.xscale('log')
   #plt.yscale('log')
   saveplt(FileName('perf', 't', min, 'x', max),
           'Deduplication vs avg target for min=%sx,max=%sx' % (min/4.0, max),
