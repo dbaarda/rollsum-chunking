@@ -3,12 +3,12 @@
 RollsumChunking modelling.
 
 This will run tests for the specified chunker with different avg/min/max
-length settings.
+length settings, and dump the summary data into a file in a directory.
 
-Usage: %(cmd)s [chunker|weibull0|weibull1|weibull2|fastcdc|fastweibull2]
+Usage: %(cmd)s <chunker|weibull0|weibull1|weibull2|fastcdc|fastweibull2> [dir]
 """
 from __future__ import print_function
-from math import *
+from math import e
 from stats1 import Sample
 import os
 import pickle
@@ -42,6 +42,52 @@ def gammalower(s, z):
     tot += term
   return tot
 
+
+class RandIter(object):
+  """ A fast LCG random uint32 iterator.
+
+  This also supports specifying a cycle period where it will repeat the
+  values, and a fast skip(n) method for skipping over n values.
+  """
+
+  # Pythons random stuff is too slow, so we use a simple good-enough LCG
+  # generator with modulus m = 2^32 for 32 bits. These values come from
+  # Numerical Recipes.
+  m = 2**32  # LCG modulus value.
+  a = 1664525  # LCG multiplier value.
+  c = 1013904223  # LCG increment value.
+  b = m - 1  # fast bitmask version of m.
+
+  def __init__(self, seed, cycle=2**32):
+    self.seed=seed
+    self.cycle=cycle
+    self.value = seed
+    self.count = 0
+
+  def __iter__(self):
+    return self
+
+  def __next__(self):
+    if not self.count % self.cycle:
+      self.value = self.seed
+    self.value = (self.a * self.value + self.c) & self.b
+    self.count += 1
+    return self.value
+
+  # For python2 compatibility.
+  next = __next__
+
+  def skip(self, n):
+    """ Skip over the next n random values. """
+    # https://www.nayuki.io/page/fast-skipping-in-a-linear-congruential-generator
+    m, a, c = self.m, self.a, self.c
+    a1 = self.a - 1
+    ma = a1 * m
+    self.value = (pow(a, n, m)*self.value + (pow(a, n, ma) - 1) // a1 * c) & self.b
+    self.count += n
+    return self.value
+
+
 class Data(object):
   """ Data source with rollsums and block hashes.
 
@@ -57,12 +103,6 @@ class Data(object):
 
   It keeps counts of the number of bytes and duplicate bytes.
   """
-
-  # Pythons random stuff is too slow, so we use a simple good-enough LCG
-  # generator with modulus m = 2^32 for 32 bits. These values come from
-  # Numerical Recipes.
-  a = 1664525  # LCG multiplier value.
-  c = 1013904223  # LCG increment value.
 
   def __init__(self, bsize=1024, bnum=512, mnum=5, seed=1):
     self.bsize = bsize     # block size.
@@ -82,43 +122,31 @@ class Data(object):
     self.dup_c = 0         # duplicate bytes scanned.
     self.blkh = 0          # the accumulated whole block hash.
     # Initialize the random generators for the original and inserted data.
-    self.dat = self.seed
-    self.ins = self.seed + 6
-
-  def getdat(self):
-    self.dat = (self.a * self.dat + self.c) & 0xffffffff
-    return self.dat
-
-  def getins(self):
-    self.ins = (self.a * self.ins + self.c) & 0xffffffff
-    return self.ins
+    self.dat = RandIter(self.seed, self.dat_p)
+    self.ins = RandIter(self.seed + 6)
 
   def getroll(self):
     """ Get the next rolling hash. """
     c = self.tot_c
-    # Start duplicating data every dat_p bytes.
-    if (c % self.dat_p) == 0:
-      self.dat = self.seed
     # After the first dat_p bytes, start making changes.
     if c < self.dat_p:
-      h = self.getdat()
+      h = self.dat.next()
     else:
       # Set i to the offset past the periodic modify point.
       i = c % self.mod_p
       # At offset mod_o modify stuff.
       if i == self.mod_o:
         # delete del_c bytes by sucking them out of dat.
-        for d in range(self.del_c):
-          self.getdat()
+        self.dat.skip(self.del_c)
         #print "%12d: start replace, del=%d" % (self.tot_c, self.del_c)
       #elif i == self.mod_e:
       #  print "%12d: stop replace, ins=%d" % (self.tot_c, self.ins_c)
       # Between mod_o and mod_e insert new data, otherwise use duplicate data.
       if self.mod_o <= i < self.mod_e:
-        h = self.getins()
+        h = self.ins.next()
       else:
         self.dup_c += 1
-        h = self.getdat()
+        h = self.dat.next()
     self.tot_c += 1
     # update blkh.
     self.blkh = hash((self.blkh, h))
@@ -417,10 +445,11 @@ def usage(code, error=None, *args):
 
 if __name__ == '__main__':
   cmd = sys.argv[1] if len(sys.argv) > 1 else None
+  dir = sys.argv[2] if len(sys.argv) > 2 else '.'
   if cmd in ("-?", "-h", "--help", None):
     usage(0)
   if cmd not in chunkers:
     usage(1, "Error: invalid chunker argument %r.", cmd)
   cls = chunkers[cmd]
-  results = alltests(cls, tsize=10000, bsize=8*1000)
-  pickle.dump(results, open('data/%s.dat' % cmd, 'wb'))
+  results = alltests(cls, tsize=1000, bsize=8*1000)
+  pickle.dump(results, open('%s/%s.dat' % (dir,cmd), 'wb'))
