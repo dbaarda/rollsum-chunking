@@ -1,9 +1,12 @@
 #!/usr/bin/python3
 """
-RollsumChunking modelling graphs.
+Generate rollsum chunking modelling graphs.
+
+Usage: %(cmd)s [dir]
 """
 from chunker import *
 import pickle
+import sys
 import matplotlib
 matplotlib.use('svg')
 import matplotlib.pyplot as plt
@@ -28,17 +31,17 @@ from matplotlib.ticker import *
 # pct for avg_size by chunker, min_len=opt, max_len=opt(16?)
 
 
-def FileName(stat,alg,min,avg,max):
+def FileName(dir,stat,alg,min,avg,max):
   """get svg graph file name from dimensions.
 
   For stat use 'perf|size(min|avg|max)' used for the y axis.
   Use 'l' for the dimension used as the timeseries label.
   Use 'x' for dimension used as x axis.
   """
-  return 'data/%s-%s-%s-%s-%s.svg' % (stat, alg, min, avg, max)
+  return '%s/%s-%s-%s-%s-%s.svg' % (dir, stat, alg, min, avg, max)
 
-def GetFileData(alg):
-  return pickle.load(open('data/%s.dat' % alg, 'rb'))
+def GetFileData(dir, alg):
+  return pickle.load(open('%s/%s.dat' % (dir,alg), 'rb'))
 
 def saveplt(filename, title, xlabel, ylabel, xticks=None, xlabels=None, yticks=None, ylabels=None):
   plt.title(title)
@@ -58,7 +61,7 @@ def saveplt(filename, title, xlabel, ylabel, xticks=None, xlabels=None, yticks=N
   plt.cla()
 
 
-def SizeMaxVsMinLimit(data, avg, max):
+def SizeMaxVsMinLimit(dir, data, avg, max):
   """Plot how size max varys with min limit."""
   d = data
   xs = [x/4.0 for x in mins]
@@ -70,10 +73,11 @@ def SizeMaxVsMinLimit(data, avg, max):
   ax.set_xlim(left=0, right=xs[-1])
   #plt.xscale('log')
   #plt.yscale('log')
-  saveplt(FileName('sizemax','t', 'x', avg, max), 'size max vs min limit for avg=%sK,max=%sx' % (avg,max),
-            'min limit fraction of avg', 'size max multiple of avg', xticks=xs)
+  saveplt(FileName(dir, 'sizemax','t', 'x', avg, max),
+          'size max vs min limit for avg=%sK,max=%sx' % (avg,max),
+          'min limit fraction of avg', 'size max multiple of avg', xticks=xs)
 
-def SizeDevVsMinLimit(data, avg, max):
+def SizeDevVsMinLimit(dir, data, avg, max):
   """Plot how size dev varys with min limit."""
   d = data
   xs = [x/4.0 for x in mins]
@@ -85,10 +89,11 @@ def SizeDevVsMinLimit(data, avg, max):
   ax.set_xlim(left=0, right=xs[-1])
   #plt.xscale('log')
   #plt.yscale('log')
-  saveplt(FileName('sizedev', 't', 'x', avg, max) , 'size dev vs min limit for avg=%sK,max=%sx' % (avg,max),
-            'min limit fraction of avg', 'size dev multiple of avg', xticks=xs)
+  saveplt(FileName(dir, 'sizedev', 't', 'x', avg, max),
+          'size dev vs min limit for avg=%sK,max=%sx' % (avg,max),
+          'min limit fraction of avg', 'size dev multiple of avg', xticks=xs)
 
-def SizeAvgVsAvgTarget(data, alg, max):
+def SizeAvgVsAvgTarget(dir, data, alg, max):
   """Plot how size avg varys with avg target."""
   d = data
   xs = avgs
@@ -100,10 +105,11 @@ def SizeAvgVsAvgTarget(data, alg, max):
   #ax.set_xlim(left=0, right=xs[-1])
   plt.xscale('log')
   #plt.yscale('log')
-  saveplt(FileName('sizeavg', alg, 't', 'x', max), 'size avg vs avg target for alg=%s,max=%sx' % (alg,max),
-            'avg target KB', 'size avg multiple of avg', xticks=xs)
+  saveplt(FileName(dir, 'sizeavg', alg, 't', 'x', max),
+          'size avg vs avg target for alg=%s,max=%sx' % (alg,max),
+          'avg target KB', 'size avg multiple of avg', xticks=xs)
 
-def PerfVsMinLimit(data, alg, max):
+def PerfVsMinLimit(dir, data, alg, max):
   """Plot how deduplication peformance varys with min limit."""
   d = data[alg]
   xs = [x/4.0 for x in mins]
@@ -115,10 +121,11 @@ def PerfVsMinLimit(data, alg, max):
   ax.set_xlim(left=0, right=xs[-1])
   #plt.xscale('log')
   #plt.yscale('log')
-  saveplt(FileName('perf', alg, 'x', 't', max), 'Deduplication vs min limit for alg=%s,max=%sx' % (alg,max),
-            'min limit fraction of avg', 'found %', xticks=xs)
+  saveplt(FileName(dir, 'perf', alg, 'x', 't', max),
+          'Deduplication vs min limit for alg=%s,max=%sx' % (alg,max),
+          'min limit fraction of avg', 'found %', xticks=xs)
 
-def PerfVsMaxLimit(data, alg, min):
+def PerfVsMaxLimit(dir, data, alg, min):
   """Plot how deduplication peformance varys with max limit."""
   d = data[alg]
   xs = [float(x) for x in maxs]
@@ -130,10 +137,11 @@ def PerfVsMaxLimit(data, alg, min):
   ax.set_xlim(left=0, right=xs[-1])
   #plt.xscale('log')
   #plt.yscale('log')
-  saveplt(FileName('perf', alg, min, 't', 'x'), 'Deduplication vs max limit for alg=%s,min=%sx' % (alg,min),
-            'max limit multiple of avg', 'found %', xticks=xs)
+  saveplt(FileName(dir, 'perf', alg, min, 't', 'x'),
+          'Deduplication vs max limit for alg=%s,min=%sx' % (alg,min),
+          'max limit multiple of avg', 'found %', xticks=xs)
 
-def PerfVsAvgSize(data, min, max):
+def PerfVsAvgSize(dir, data, min, max):
   """Plot how deduplication peformance varys with avg target."""
   d = data
   xs = avgs
@@ -146,9 +154,14 @@ def PerfVsAvgSize(data, min, max):
   #ax.set_xlim(left=0, right=xs[-1])
   plt.xscale('log')
   #plt.yscale('log')
-  saveplt(FileName('perf', 't', min, 'x', max),
+  saveplt(FileName(dir, 'perf', 't', min, 'x', max),
           'Deduplication vs avg target for min=%sx,max=%sx' % (min/4.0, max),
           'avg size KB', 'found %', xticks=avgs)
+
+dir = sys.argv[1] if len(sys.argv) > 1 else '.'
+if dir in ("-?", "-h", "--help", None):
+  print(__doc__ % dict(cmd=os.path.basename(sys.argv[0])))
+  sys.exit(1)
 
 # This builds a results dict structured as;
 # results[alg][avg][min][max] = (perf, blkstats, dupstats)
@@ -156,7 +169,7 @@ def PerfVsAvgSize(data, min, max):
 algs = ['weibull0', 'weibull1', 'weibull2', 'fastcdc']
 data = {}
 for alg in algs:
-  data[alg] = GetFileData(alg)
+  data[alg] = GetFileData(dir, alg)
 
 alg0 = data[algs[0]]
 avgs = sorted(alg0)
@@ -166,19 +179,19 @@ min0 = avg0[mins[0]]
 maxs = sorted(min0)
 
 for alg in algs:
-  PerfVsMinLimit(data, alg, maxs[-1])
-  PerfVsMaxLimit(data, alg, mins[0])
-  SizeAvgVsAvgTarget(data, alg, maxs[0])
-  SizeAvgVsAvgTarget(data, alg, maxs[-1])
-SizeMaxVsMinLimit(data, avgs[0], maxs[-1])
-SizeDevVsMinLimit(data, avgs[0], maxs[-1])
-PerfVsAvgSize(data, mins[0], maxs[-1])
-PerfVsAvgSize(data, 0, 2)
-PerfVsAvgSize(data, 0, 4)
-PerfVsAvgSize(data, 1, 2)
-PerfVsAvgSize(data, 1, 4)
-PerfVsAvgSize(data, 1, 8)
-PerfVsAvgSize(data, 2, 2)
-PerfVsAvgSize(data, 2, 4)
-PerfVsAvgSize(data, 2, 8)
-PerfVsAvgSize(data, 3, 2)
+  PerfVsMinLimit(dir, data, alg, maxs[-1])
+  PerfVsMaxLimit(dir, data, alg, mins[0])
+  SizeAvgVsAvgTarget(dir, data, alg, maxs[0])
+  SizeAvgVsAvgTarget(dir, data, alg, maxs[-1])
+SizeMaxVsMinLimit(dir, data, avgs[0], maxs[-1])
+SizeDevVsMinLimit(dir, data, avgs[0], maxs[-1])
+PerfVsAvgSize(dir, data, mins[0], maxs[-1])
+PerfVsAvgSize(dir, data, 0, 2)
+PerfVsAvgSize(dir, data, 0, 4)
+PerfVsAvgSize(dir, data, 1, 2)
+PerfVsAvgSize(dir, data, 1, 4)
+PerfVsAvgSize(dir, data, 1, 8)
+PerfVsAvgSize(dir, data, 2, 2)
+PerfVsAvgSize(dir, data, 2, 4)
+PerfVsAvgSize(dir, data, 2, 8)
+PerfVsAvgSize(dir, data, 3, 2)
