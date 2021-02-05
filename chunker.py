@@ -8,12 +8,12 @@ length settings, and dump the summary data into a file in a directory.
 Usage: %(cmd)s <chunker|weibull0|weibull1|weibull2|fastcdc|fastweibull2> [dir]
 """
 from __future__ import print_function
-from math import e
-from stats1 import Sample
 import os
 import pickle
 import random
 import sys
+from math import e, gamma
+from stats1 import Sample
 
 def solve(f, x0=-1.0e9, x1=1.0e9, e=1.0e-9):
   """ Solve f(x)=0 for x where x0<=x<=x1 within +-e. """
@@ -62,16 +62,19 @@ class RandIter(object):
     self.seed=seed
     self.cycle=cycle
     self.value = seed
-    self.count = 0
+    self.count = 0  # count of total values produced.
+    self.dat_n = 0  # count of values left this cycle.
 
   def __iter__(self):
     return self
 
   def __next__(self):
-    if not self.count % self.cycle:
+    if not self.dat_n:
       self.value = self.seed
+      self.dat_n = self.cycle
     self.value = (self.a * self.value + self.c) & self.b
     self.count += 1
+    self.dat_n -= 1
     return self.value
 
   # For python2 compatibility.
@@ -79,23 +82,29 @@ class RandIter(object):
 
   def skip(self, n):
     """ Skip over the next n random values. """
+    self.count += n
+    self.dat_n -= n
+    # if past the cycle length, skip to the start of the last cycle.
+    if self.dat_n < 0:
+      self.value = self.seed
+      self.dat_n %= self.cycle
+      n = self.cycle - self.dat_n
     # https://www.nayuki.io/page/fast-skipping-in-a-linear-congruential-generator
     m, a, c = self.m, self.a, self.c
     a1 = self.a - 1
     ma = a1 * m
     self.value = (pow(a, n, m)*self.value + (pow(a, n, ma) - 1) // a1 * c) & self.b
-    self.count += n
     return self.value
 
 
 class Data(object):
   """ Data source with rollsums and block hashes.
 
-  It simulates a stream of data that starts with bnum blocks of initial random
-  data that is then repeated every bnum blocks with modifications. The
-  modifications consist of a modification every mnum blocks that starts 1/3 of
-  a block into the first block, and replaces the next 1/7 of a block with 1/5
-  of a block of new random data.
+  It simulates a stream of data that starts with olen bytes of initial random
+  data that is then repeated with modifications. The modifications are cycles
+  of copied, inserted, and deleted data. The copy, insert, and delete have
+  exponentially distributed random lengths with averages of clen, ilen, and
+  dlen respectively.
 
   It simulates returning a 32bit rolling hash for each input byte with
   getroll(). A simulated strong hash of the previous block can be fetched with
@@ -104,17 +113,16 @@ class Data(object):
   It keeps counts of the number of bytes and duplicate bytes.
   """
 
-  def __init__(self, bsize=1024, bnum=512, mnum=5, seed=1):
-    self.bsize = bsize     # block size.
-    self.bnum = bnum       # number of blocks before repeating.
-    self.mnum = mnum       # number of repeated blocks per change.
+  def __init__(self, olen, clen, ilen, dlen, seed=1):
+    self.olen = olen
+    self.clen = clen
+    self.ilen = ilen
+    self.dlen = dlen
     self.seed = seed
-    self.dat_p = bsize * bnum  # period over which data repeats.
-    self.mod_p = bsize * mnum  # period over which changes happen.
-    self.mod_o = bsize // 3    # offset at which changes happen.
-    self.del_c = bsize // 7    # bytes deleted each change.
-    self.ins_c = bsize // 5    # bytes inserted each change.
-    self.mod_e = self.mod_o + self.ins_c
+    # exponential distribution lambda parameters for clen/ilen/dlen.
+    self.clambd = 1.0/clen
+    self.ilambd = 1.0/ilen
+    self.dlambd = 1.0/dlen
     self.reset()
 
   def reset(self):
@@ -122,33 +130,42 @@ class Data(object):
     self.dup_c = 0         # duplicate bytes scanned.
     self.blkh = 0          # the accumulated whole block hash.
     # Initialize the random generators for the original and inserted data.
-    self.dat = RandIter(self.seed, self.dat_p)
+    self.dat = RandIter(self.seed, self.olen)
     self.ins = RandIter(self.seed + 6)
+    self.mod = random.Random(self.seed)
+    self.cpystats = Sample()
+    self.insstats = Sample()
+    self.delstats = Sample()
+    self.initcycle()
+
+  def initcycle(self):
+    self.dat_n = int(self.mod.expovariate(self.clambd))
+    self.ins_n = self.ilen and int(self.mod.expovariate(self.ilambd))
+    self.del_n = self.dlen and int(self.mod.expovariate(self.dlambd))
+    self.cpystats.add(self.dat_n)
+    self.insstats.add(self.ins_n)
+    self.delstats.add(self.del_n)
 
   def getroll(self):
-    """ Get the next rolling hash. """
-    c = self.tot_c
-    # After the first dat_p bytes, start making changes.
-    if c < self.dat_p:
+    if self.tot_c < self.olen:
+      # Output initial data.
       h = self.dat.next()
+    elif self.dat_n:
+      # Output copied data.
+      h = self.dat.next()
+      self.dat_n -= 1
+      self.dup_c += 1
+    elif self.ins_n:
+      # Output inserted data.
+      h = self.ins.next()
+      self.ins_n -= 1
     else:
-      # Set i to the offset past the periodic modify point.
-      i = c % self.mod_p
-      # At offset mod_o modify stuff.
-      if i == self.mod_o:
-        # delete del_c bytes by sucking them out of dat.
-        self.dat.skip(self.del_c)
-        #print "%12d: start replace, del=%d" % (self.tot_c, self.del_c)
-      #elif i == self.mod_e:
-      #  print "%12d: stop replace, ins=%d" % (self.tot_c, self.ins_c)
-      # Between mod_o and mod_e insert new data, otherwise use duplicate data.
-      if self.mod_o <= i < self.mod_e:
-        h = self.ins.next()
-      else:
-        self.dup_c += 1
-        h = self.dat.next()
+      # do delete, setup next cycle, and recurse.
+      self.dat.skip(self.del_n)
+      self.initcycle()
+      return self.getroll()
+    # increment tot_c and update blkh.
     self.tot_c += 1
-    # update blkh.
     self.blkh = hash((self.blkh, h))
     return h
 
@@ -158,11 +175,13 @@ class Data(object):
     return blkh
 
   def __repr__(self):
-    return "Data(bsize=%s, bnum=%s, mnum=%s, seed=%s)" % (self.bsize, self.bnum, self.mnum, self.seed)
+    return "Data(olen=%s, clen=%s, ilen=%s, dlen=%s, seed=%s)" % (
+        self.olen, self.clen, self.ilen, self.dlen, self.seed)
 
   def __str__(self):
-    return "%r: tot=%d dup=%d(%4.1f%%)" % (
-        self, self.tot_c, self.dup_c, 100.0 * self.dup_c / self.tot_c)
+    return "%r: tot=%d dup=%d(%4.1f%%)\n  cpy: %s\n  ins: %s\n  del: %s" % (
+        self, self.tot_c, self.dup_c, 100.0 * self.dup_c / self.tot_c,
+        self.cpystats, self.insstats, self.delstats)
 
 
 class Chunker(object):
@@ -415,18 +434,20 @@ def tableadd(table, value, *args):
 def alltests(cls, tsize, bsize):
   """Get results for different avg,min,max chunker args."""
   results = {}
-  data = Data(bnum=tsize, bsize=bsize, mnum=4)
+  # Data size is tsize times the average 8*bsize blocks.
+  dsize = tsize*bsize*8
+  data = Data(dsize, bsize*16, bsize*8, bsize*4)
   for bavg in (1,2,4,8,16,32,64):
-    bavg_len = bavg * 1024
+    bavg_len = bsize * bavg
     for bmin in (0, 1, 2, 3):
       bmin_len = bavg_len * bmin // 4
       for bmax in (16, 8, 4, 2):
         bmax_len = bavg_len * bmax
         data.reset()
         chunker = cls.from_avg(bavg_len, bmin_len, bmax_len)
-        result = runtest(chunker, data, 2*tsize*bsize)
+        result = runtest(chunker, data, 2*dsize)
         tableadd(results, result, bavg, bmin, bmax)
-  return results
+  return (tsize, bsize, results)
 
 
 chunkers = dict(
@@ -437,11 +458,13 @@ chunkers = dict(
     fastcdc=FastCDCChunker,
     fastweibull2=FastWeibull2Chunker)
 
+
 def usage(code, error=None, *args):
   if error:
     print(error % args)
   print(__doc__ % dict(cmd=os.path.basename(sys.argv[0])))
   sys.exit(code)
+
 
 if __name__ == '__main__':
   cmd = sys.argv[1] if len(sys.argv) > 1 else None
@@ -451,5 +474,5 @@ if __name__ == '__main__':
   if cmd not in chunkers:
     usage(1, "Error: invalid chunker argument %r.", cmd)
   cls = chunkers[cmd]
-  results = alltests(cls, tsize=1000, bsize=8*1000)
+  results = alltests(cls, tsize=1000, bsize=1024)
   pickle.dump(results, open('%s/%s.dat' % (dir,cmd), 'wb'))

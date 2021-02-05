@@ -17,7 +17,7 @@ from matplotlib.ticker import *
 # chunker (chunker, Weibull1, Weibull2, FastCDCChunker)
 # min len (0, 1/4, 1/2, 3/4)
 # max_len (16, 8, 4, 2)
-# avg_len (1,2,4, 8, 16, 32, 64)
+# avg_len (1, 2, 4, 8, 16, 32, 64)
 #
 # avg_size, max_size, min_size, dup_pct
 #
@@ -66,7 +66,7 @@ def SizeMaxVsMinLimit(dir, data, avg, max):
   d = data
   xs = [x/4.0 for x in mins]
   for alg in algs:
-    sizes = [d[alg][avg][min][max][1].max/(avg * 1024.0) for min in mins]
+    sizes = [d[alg][avg][min][max][1].max/(avg * bsize) for min in mins]
     plt.plot(xs, sizes, label="alg=%s" % alg)
   ax = plt.gca()
   ax.set_ylim(bottom=0)
@@ -74,7 +74,7 @@ def SizeMaxVsMinLimit(dir, data, avg, max):
   #plt.xscale('log')
   #plt.yscale('log')
   saveplt(FileName(dir, 'sizemax','t', 'x', avg, max),
-          'size max vs min limit for avg=%sK,max=%sx' % (avg,max),
+          'size max vs min limit for avg=%s,max=%sx' % (avg, max),
           'min limit fraction of avg', 'size max multiple of avg', xticks=xs)
 
 def SizeDevVsMinLimit(dir, data, avg, max):
@@ -82,7 +82,7 @@ def SizeDevVsMinLimit(dir, data, avg, max):
   d = data
   xs = [x/4.0 for x in mins]
   for alg in algs:
-    sizes = [d[alg][avg][min][max][1].dev/(avg * 1024.0) for min in mins]
+    sizes = [d[alg][avg][min][max][1].dev/(avg * bsize) for min in mins]
     plt.plot(xs, sizes, label="alg=%s" % alg)
   ax = plt.gca()
   ax.set_ylim(bottom=0)
@@ -90,7 +90,7 @@ def SizeDevVsMinLimit(dir, data, avg, max):
   #plt.xscale('log')
   #plt.yscale('log')
   saveplt(FileName(dir, 'sizedev', 't', 'x', avg, max),
-          'size dev vs min limit for avg=%sK,max=%sx' % (avg,max),
+          'size dev vs min limit for avg=%s,max=%sx' % (avg, max),
           'min limit fraction of avg', 'size dev multiple of avg', xticks=xs)
 
 def SizeAvgVsAvgTarget(dir, data, alg, max):
@@ -98,7 +98,7 @@ def SizeAvgVsAvgTarget(dir, data, alg, max):
   d = data
   xs = avgs
   for min in mins:
-    sizes = [d[alg][avg][min][max][1].avg/(avg * 1024.0) for avg in avgs]
+    sizes = [d[alg][avg][min][max][1].avg/(avg * bsize) for avg in avgs]
     plt.plot(xs, sizes, label="min=%sx" % (min/4.0))
   ax = plt.gca()
   #ax.set_ylim(bottom=0)
@@ -107,7 +107,7 @@ def SizeAvgVsAvgTarget(dir, data, alg, max):
   #plt.yscale('log')
   saveplt(FileName(dir, 'sizeavg', alg, 't', 'x', max),
           'size avg vs avg target for alg=%s,max=%sx' % (alg,max),
-          'avg target KB', 'size avg multiple of avg', xticks=xs)
+          'avg target', 'size avg multiple of avg', xticks=xs)
 
 def PerfVsMinLimit(dir, data, alg, max):
   """Plot how deduplication peformance varys with min limit."""
@@ -115,7 +115,7 @@ def PerfVsMinLimit(dir, data, alg, max):
   xs = [x/4.0 for x in mins]
   for avg in avgs:
     perfs = [d[avg][min][max][0]*100.0 for min in mins]
-    plt.plot(xs, perfs, label="avg=%sK" % avg)
+    plt.plot(xs, perfs, label="avg=%s" % avg)
   ax = plt.gca()
   ax.set_ylim(bottom=0)
   ax.set_xlim(left=0, right=xs[-1])
@@ -131,7 +131,7 @@ def PerfVsMaxLimit(dir, data, alg, min):
   xs = [float(x) for x in maxs]
   for avg in avgs:
     perfs = [d[avg][min][max][0]*100.0 for max in maxs]
-    plt.plot(xs, perfs, label="avg=%sK" % avg)
+    plt.plot(xs, perfs, label="avg=%s" % avg)
   ax = plt.gca()
   ax.set_ylim(bottom=0)
   ax.set_xlim(left=0, right=xs[-1])
@@ -147,7 +147,7 @@ def PerfVsAvgSize(dir, data, min, max):
   xs = avgs
   for alg in algs:
     perfs = [d[alg][avg][min][max][0]*100.0 for avg in avgs]
-    xs = [d[alg][avg][min][max][1].avg/1024.0 for avg in avgs]
+    xs = [d[alg][avg][min][max][1].avg/bsize for avg in avgs]
     plt.plot(xs, perfs, label="alg=%s" % alg)
   ax = plt.gca()
   ax.set_ylim(bottom=0)
@@ -156,7 +156,7 @@ def PerfVsAvgSize(dir, data, min, max):
   #plt.yscale('log')
   saveplt(FileName(dir, 'perf', 't', min, 'x', max),
           'Deduplication vs avg target for min=%sx,max=%sx' % (min/4.0, max),
-          'avg size KB', 'found %', xticks=avgs)
+          'avg size', 'found %', xticks=avgs)
 
 dir = sys.argv[1] if len(sys.argv) > 1 else '.'
 if dir in ("-?", "-h", "--help", None):
@@ -169,7 +169,7 @@ if dir in ("-?", "-h", "--help", None):
 algs = ['weibull0', 'weibull1', 'weibull2', 'fastcdc']
 data = {}
 for alg in algs:
-  data[alg] = GetFileData(dir, alg)
+  tsize, bsize, data[alg] = GetFileData(dir, alg)
 
 alg0 = data[algs[0]]
 avgs = sorted(alg0)
