@@ -139,10 +139,10 @@ class Data(object):
     self.initcycle()
 
   def initcycle(self):
-    self.dat_n = int(self.mod.expovariate(self.clambd))
+    self.cpy_n = int(self.mod.expovariate(self.clambd))
     self.ins_n = self.ilen and int(self.mod.expovariate(self.ilambd))
     self.del_n = self.dlen and int(self.mod.expovariate(self.dlambd))
-    self.cpystats.add(self.dat_n)
+    self.cpystats.add(self.cpy_n)
     self.insstats.add(self.ins_n)
     self.delstats.add(self.del_n)
 
@@ -150,10 +150,10 @@ class Data(object):
     if self.tot_c < self.olen:
       # Output initial data.
       h = self.dat.next()
-    elif self.dat_n:
+    elif self.cpy_n:
       # Output copied data.
       h = self.dat.next()
-      self.dat_n -= 1
+      self.cpy_n -= 1
       self.dup_c += 1
     elif self.ins_n:
       # Output inserted data.
@@ -190,7 +190,20 @@ class Chunker(object):
   This is the standard simple chunker that gives an exponential distribution
   of block sizes between min and max. The only difference is it uses 'h<p`
   instead of 'h&mask==r' for the hash judgement, which supports arbitrary
-  target block sizes, not just power-of-2 sizes.
+  target block sizes, not just power-of-2 sizes. For tgt_len as the mean, the
+  distribution's curves where x is measured from min_len and L is the
+  normal exponential distribution lambda parameter are;
+
+    f(x) = L
+    CDF(x) = 1 - e^-(L*x)
+    PDF(x) = L*e^-(L*x)
+    mean = C + 1/L*(1-e^-(L*T))
+
+  Where;
+
+    L = 1/tgt_len
+    C = min_len
+    T = max_len - min_len
 
   The tgt_len for this chunker represents the exponential distribution mean
   size, not including the affects of min_len and max_len.
@@ -215,10 +228,10 @@ class Chunker(object):
   @classmethod
   def get_avg_len(cls, tgt_len, min_len, max_len):
     """Get the avg_len given a tgt_len."""
-    try:
-      return min_len + (1.0 - e**(float(min_len - max_len)/tgt_len)) * tgt_len
-    except ZeroDivisionError:
+    if tgt_len <= 0:
       return min_len
+    z = (max_len - min_len)/tgt_len
+    return min_len + tgt_len * (1.0 - e**-z)
 
   @classmethod
   def get_tgt_len(cls, avg_len, min_len, max_len):
@@ -229,11 +242,11 @@ class Chunker(object):
     self.blocks = {}
     self.blkstats = Sample()
     self.dupstats = Sample()
+    self.prob = 2**32 // self.tgt_len
     self.initblock()
 
   def initblock(self):
     self.blk_len = 0
-    self.prob = 2**32 // self.tgt_len
 
   def incblock(self):
     self.blk_len += 1
@@ -254,35 +267,42 @@ class Chunker(object):
     self.initblock()
 
   def __repr__(self):
-    return "%s(tgt_len=%s, min_len=%s, max_len=%s)" % (self.__class__.__name__, self.tgt_len, self.min_len, self.max_len)
+    return "%s(tgt_len=%s, min_len=%s, max_len=%s)" % (
+        self.__class__.__name__, self.tgt_len, self.min_len, self.max_len)
 
   def __str__(self):
-    return "%r: avg_len=%s\n  blks: %s\n  dups: %s" % (self, self.avg_len, self.blkstats, self.dupstats)
+    return "%r: avg_len=%s\n  blks: %s\n  dups: %s" % (
+        self, self.avg_len, self.blkstats, self.dupstats)
 
 
-class WeibullChunker(Chunker):
-  """ WeibullChunker class.
+class Weibull0Chunker(Chunker):
+  """ Weibull0Chunker class.
 
   This uses a chunking probability criteria where the hash is treated as a
   fixed point number in the range 0.0 -> 1.0 and compared to a slowly
-  increasing probability. The position x is a chunk boundary if h < p where
-  the p "hazard function" is;
+  increasing probability. The position x past min_len is a chunk boundary if h
+  < f(x) where the f(x) "hazard function" is a function of x^P. This gives a
+  Weibull block length distribution. For tgt_len as the mean and P curve
+  power, the distribution's curves where x is measured from min_len and k and
+  L are the normal Weibull parameters are;
 
-  p = M * x^P
+    f(x) = M*x^P
+    CDF(x) = 1 - e^-(M/k*x^k)
+    PDF(x) = M*x^(k-1) * e^-(M/k*x^k)
+    mean = C + L*gammalower((k+1)/k,(T/L)^k) + T*e^-((T/L)^k)
 
-  This gives a Weibull block length distribution. For tgt_len as the mean and
-  P curve power, the Weibull k and L (lambda) parameters, and the resulting M
-  values are;
+  Where;
 
-  k = P + 1
-  L = tgt_len/gamma(1+1/k)
-  M = k/L^k = b*k
+    k = P + 1
+    L = tgt_len/gamma(1+1/k)
+    M = k/L^k = b*k
+    C = min_len
+    T = max_len - min_len
 
-  The tgt_len for this chunker represents the distribution mean, not
-  including the effects of min_len and max_len.
-
-  This class uses P=0 which makes it the same as a classic chunker, but
-  subclasses can overide P for different variants.
+  The tgt_len for this chunker represents the distribution mean, not including
+  the effects of min_len and max_len. This class uses P=0 (k=1) which makes it
+  the same as a classic chunker, but subclasses can overide P for different
+  variants.
   """
   P = 0
 
@@ -306,7 +326,7 @@ class WeibullChunker(Chunker):
     return min_len + L * gammalower(s, z) + t*e**(-z)
 
   def reset(self):
-    super(WeibullChunker, self).reset()
+    super(Weibull0Chunker, self).reset()
     # Set the M probability multiplier.
     k = self.P + 1
     L = self.tgt_len / gamma(1.0 + 1.0/k)
@@ -322,10 +342,63 @@ class WeibullChunker(Chunker):
     if x > 0:
       self.prob = int(self.M * x**self.P)
 
-class Weibull1Chunker(WeibullChunker):
+class Weibull1Chunker(Weibull0Chunker):
   P = 1
 
-class Weibull2Chunker(WeibullChunker):
+class Weibull2Chunker(Weibull0Chunker):
+  P = 2
+
+
+class WeibullT0Chunker(Weibull0Chunker):
+  """WeibullT0 Chunker class.
+
+  This is the similar to the Weibull Chunker except that min_len doesn't just
+  shift the distribution to the right, instead it zero's the hazard function.
+  This changes the distribution so it's not actually a Weibull distribution
+  any more, unless min_len=0. The distribution's curves, where x is measured
+  from min_len and k and L are the normal Weibull parameters, are;
+
+    f(x) = M*(x+C)^P
+    CDF(x) = 1 - e^-(M/k*((x+C)^k - C^k))
+    PDF(x) = M*(x+C)^(k-1) * e^-(M/k*((x+C)^k - C^k))
+    mean = L*e^((C/L)^k) * (gammalower((k+1)/k, ((T+C)/L)^k) -
+        gammalower((k+1)/k, (C/L)^k)) + (C+T)*e^-(((T+C)/L)^k - (C/L)^k)
+
+  Where;
+
+    k = P + 1
+    L = tgt_len/gamma(1+1/k)
+    M = k/L^k
+    C = min_len
+    T = max_len - min_len
+
+  The tgt_len for this chunker represents the weibull distribution mean, not
+  including the effects of min_len and max_len. This class uses P=0 (k=1)
+  which makes it the same as a classic chunker, but subclasses can overide P
+  for different variants.
+  """
+
+  @classmethod
+  def get_avg_len(cls, tgt_len, min_len, max_len):
+    if tgt_len <= 0:
+      return min_len
+    k = cls.P + 1
+    s = 1.0 + 1.0/k
+    L = tgt_len / gamma(s)
+    zc = (min_len/L)**k
+    zt = (max_len/L)**k
+    return L * e**zc * (gammalower(s, zt) - gammalower(s, zc)) + max_len*e**(zc-zt)
+
+  def incblock(self):
+    self.blk_len += 1
+    x = self.blk_len
+    if x >= self.min_len:
+      self.prob = int(self.M * x**self.P)
+
+class WeibullT1Chunker(WeibullT0Chunker):
+  P = 1
+
+class WeibullT2Chunker(WeibullT0Chunker):
   P = 2
 
 
@@ -371,7 +444,7 @@ class FastCDCChunker(Chunker):
 
 
 class FastWeibull2Chunker(Weibull2Chunker):
-  """ FastWeibullChunker class.
+  """ FastWeibull2Chunker class.
 
   This is the same as Weibull2Chunker except it aproximates it using integers only
   to increment prob every dx iterations. This turns out slower in Python, but
@@ -383,7 +456,7 @@ class FastWeibull2Chunker(Weibull2Chunker):
     self.incr = 0
     super(FastWeibull2Chunker, self).reset()
     # set default update interval and scaling values. These scaling values ensure
-    # that incr is large enough to be accurate (greater than 2^7).
+    # that incr is large enough to be accurate enough (greater than 2^7).
     dx, incr = 1, 2*self.M
     while incr < 128:
       dx *= 2
@@ -452,9 +525,12 @@ def alltests(cls, tsize, bsize):
 
 chunkers = dict(
     chunker=Chunker,
-    weibull0=WeibullChunker,
+    weibull0=Weibull0Chunker,
     weibull1=Weibull1Chunker,
     weibull2=Weibull2Chunker,
+    weibullt0=WeibullT0Chunker,
+    weibullt1=WeibullT1Chunker,
+    weibullt2=WeibullT2Chunker,
     fastcdc=FastCDCChunker,
     fastweibull2=FastWeibull2Chunker)
 
@@ -474,5 +550,5 @@ if __name__ == '__main__':
   if cmd not in chunkers:
     usage(1, "Error: invalid chunker argument %r.", cmd)
   cls = chunkers[cmd]
-  results = alltests(cls, tsize=10000, bsize=1024)
+  results = alltests(cls, tsize=1000, bsize=1024)
   pickle.dump(results, open('%s/%s.dat' % (dir,cmd), 'wb'))

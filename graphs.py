@@ -166,7 +166,7 @@ if dir in ("-?", "-h", "--help", None):
 # This builds a results dict structured as;
 # results[alg][avg][min][max] = (perf, blkstats, dupstats)
 #algs = sorted(chunkers)
-algs = ['weibull0', 'weibull1', 'weibull2', 'fastcdc']
+algs = ['chunker', 'weibull1', 'weibull2', 'weibullt1', 'weibullt2', 'fastcdc']
 data = {}
 for alg in algs:
   tsize, bsize, data[alg] = GetFileData(dir, alg)
