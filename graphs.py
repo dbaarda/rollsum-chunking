@@ -31,14 +31,21 @@ from matplotlib.ticker import *
 # pct for avg_size by chunker, min_len=opt, max_len=opt(16?)
 
 
-def FileName(dir,stat,alg,min,avg,max):
+def FileName(dir,stat,alg,avg,min,max):
   """get svg graph file name from dimensions.
 
   For stat use 'perf|size(min|avg|max)' used for the y axis.
-  Use 'l' for the dimension used as the timeseries label.
+  Use 't' for the dimension used as the timeseries label.
   Use 'x' for dimension used as x axis.
+  Use 'o' for the optimal value for the algorithm.
+  Use 's' for the standard value for the algorithm.
   """
-  return '%s/%s-%s-%s-%s-%s.svg' % (dir, stat, alg, min, avg, max)
+  #print("%r %r %r %r" % (alg, avg, min, max))
+  if min not in tuple('txos'):
+    min = '%.2f' % min
+  if max not in tuple(('txos'):
+    max = '%.1f' % max
+  return '%s/%s-%s-%s-%s-%s.svg' % (dir, stat, alg, avg, min, max)
 
 def GetFileData(dir, alg):
   return pickle.load(open('%s/%s.dat' % (dir,alg), 'rb'))
@@ -64,98 +71,97 @@ def saveplt(filename, title, xlabel, ylabel, xticks=None, xlabels=None, yticks=N
 def SizeMaxVsMinLimit(dir, data, avg, max):
   """Plot how size max varys with min limit."""
   d = data
-  xs = [x/4.0 for x in mins]
+  xs = mins
   for alg in algs:
-    sizes = [d[alg][avg][min][max][1].max/(avg * bsize) for min in mins]
-    plt.plot(xs, sizes, label="alg=%s" % alg)
+    ys = [d[alg][avg][min][max][1].max/(avg * bsize) for min in mins]
+    plt.plot(xs, ys, label="alg=%s" % alg)
   ax = plt.gca()
   ax.set_ylim(bottom=0)
   ax.set_xlim(left=0, right=xs[-1])
   #plt.xscale('log')
   #plt.yscale('log')
-  saveplt(FileName(dir, 'sizemax','t', 'x', avg, max),
-          'size max vs min limit for avg=%s,max=%sx' % (avg, max),
-          'min limit fraction of avg', 'size max multiple of avg', xticks=xs)
+  saveplt(FileName(dir, 'sizemax','t', avg, 'x', max),
+          'size max vs min limit for avg=%s,max=%.1fx' % (avg, max),
+          'min limit fraction of avg', 'size max multiple of avg') #, xticks=xs)
 
 def SizeDevVsMinLimit(dir, data, avg, max):
   """Plot how size dev varys with min limit."""
   d = data
-  xs = [x/4.0 for x in mins]
+  xs = mins
   for alg in algs:
-    sizes = [d[alg][avg][min][max][1].dev/(avg * bsize) for min in mins]
-    plt.plot(xs, sizes, label="alg=%s" % alg)
+    ys = [d[alg][avg][min][max][1].dev/(avg * bsize) for min in mins]
+    plt.plot(xs, ys, label="alg=%s" % alg)
   ax = plt.gca()
   ax.set_ylim(bottom=0)
   ax.set_xlim(left=0, right=xs[-1])
   #plt.xscale('log')
   #plt.yscale('log')
-  saveplt(FileName(dir, 'sizedev', 't', 'x', avg, max),
-          'size dev vs min limit for avg=%s,max=%sx' % (avg, max),
-          'min limit fraction of avg', 'size dev multiple of avg', xticks=xs)
+  saveplt(FileName(dir, 'sizedev', 't', avg, 'x', max),
+          'size dev vs min limit for avg=%s,max=%.1fx' % (avg, max),
+          'min limit fraction of avg', 'size dev multiple of avg') #, xticks=xs)
 
 def SizeAvgVsAvgTarget(dir, data, alg, max):
   """Plot how size avg varys with avg target."""
   d = data
   xs = avgs
   for min in mins:
-    sizes = [d[alg][avg][min][max][1].avg/(avg * bsize) for avg in avgs]
-    plt.plot(xs, sizes, label="min=%sx" % (min/4.0))
+    ys = [d[alg][avg][min][max][1].avg/(avg * bsize) for avg in avgs]
+    plt.plot(xs, ys, label="min=%.2fx" % min)
   ax = plt.gca()
   #ax.set_ylim(bottom=0)
   #ax.set_xlim(left=0, right=xs[-1])
   plt.xscale('log')
   #plt.yscale('log')
-  saveplt(FileName(dir, 'sizeavg', alg, 't', 'x', max),
-          'size avg vs avg target for alg=%s,max=%sx' % (alg,max),
+  saveplt(FileName(dir, 'sizeavg', alg, 'x', 't', max),
+          'size avg vs avg target for alg=%s,max=%.1fx' % (alg,max),
           'avg target', 'size avg multiple of avg', xticks=xs)
 
 def PerfVsMinLimit(dir, data, alg, max):
   """Plot how deduplication peformance varys with min limit."""
   d = data[alg]
-  xs = [x/4.0 for x in mins]
+  xs = mins
   for avg in avgs:
-    perfs = [d[avg][min][max][0]*100.0 for min in mins]
-    plt.plot(xs, perfs, label="avg=%s" % avg)
+    ys = [d[avg][min][max][0]*100.0 for min in mins]
+    plt.plot(xs, ys, label="avg=%s" % avg)
   ax = plt.gca()
   ax.set_ylim(bottom=0)
   ax.set_xlim(left=0, right=xs[-1])
   #plt.xscale('log')
   #plt.yscale('log')
-  saveplt(FileName(dir, 'perf', alg, 'x', 't', max),
-          'Deduplication vs min limit for alg=%s,max=%sx' % (alg,max),
-          'min limit fraction of avg', 'found %', xticks=xs)
+  saveplt(FileName(dir, 'perf', alg, 't', 'x', max),
+          'Deduplication vs min limit for alg=%s,max=%.1fx' % (alg,max),
+          'min limit fraction of avg', 'found %') #, xticks=xs)
 
 def PerfVsMaxLimit(dir, data, alg, min):
   """Plot how deduplication peformance varys with max limit."""
   d = data[alg]
-  xs = [float(x) for x in maxs]
+  xs = maxs
   for avg in avgs:
-    perfs = [d[avg][min][max][0]*100.0 for max in maxs]
-    plt.plot(xs, perfs, label="avg=%s" % avg)
-  ax = plt.gca()
-  ax.set_ylim(bottom=0)
-  ax.set_xlim(left=0, right=xs[-1])
-  #plt.xscale('log')
-  #plt.yscale('log')
-  saveplt(FileName(dir, 'perf', alg, min, 't', 'x'),
-          'Deduplication vs max limit for alg=%s,min=%sx' % (alg,min),
-          'max limit multiple of avg', 'found %', xticks=xs)
-
-def PerfVsAvgSize(dir, data, min, max):
-  """Plot how deduplication peformance varys with avg target."""
-  d = data
-  xs = avgs
-  for alg in algs:
-    perfs = [d[alg][avg][min][max][0]*100.0 for avg in avgs]
-    xs = [d[alg][avg][min][max][1].avg/bsize for avg in avgs]
-    plt.plot(xs, perfs, label="alg=%s" % alg)
+    ys = [d[avg][min][max][0]*100.0 for max in maxs]
+    plt.plot(xs, ys, label="avg=%s" % avg)
   ax = plt.gca()
   ax.set_ylim(bottom=0)
   #ax.set_xlim(left=0, right=xs[-1])
   plt.xscale('log')
   #plt.yscale('log')
-  saveplt(FileName(dir, 'perf', 't', min, 'x', max),
-          'Deduplication vs avg target for min=%sx,max=%sx' % (min/4.0, max),
+  saveplt(FileName(dir, 'perf', alg, 't', min, 'x'),
+          'Deduplication vs max limit for alg=%s,min=%.2fx' % (alg,min),
+          'max limit multiple of avg', 'found %', xticks=xs)
+
+def PerfVsAvgSize(dir, data, min, max):
+  """Plot how deduplication peformance varys with avg size."""
+  d = data
+  for alg in algs:
+    xs = [d[alg][avg][min][max][1].avg/bsize for avg in avgs]
+    ys = [d[alg][avg][min][max][0]*100.0 for avg in avgs]
+    plt.plot(xs, ys, label="alg=%s" % alg)
+  ax = plt.gca()
+  ax.set_ylim(bottom=0)
+  #ax.set_xlim(left=0, right=xs[-1])
+  plt.xscale('log')
+  #plt.yscale('log')
+  saveplt(FileName(dir, 'perf', 't', 'x', min, max),
+          'Deduplication vs avg target for min=%.2fx,max=%.1fx' % (min, max),
           'avg size', 'found %', xticks=avgs)
 
 dir = sys.argv[1] if len(sys.argv) > 1 else '.'
@@ -186,12 +192,12 @@ for alg in algs:
 SizeMaxVsMinLimit(dir, data, avgs[0], maxs[-1])
 SizeDevVsMinLimit(dir, data, avgs[0], maxs[-1])
 PerfVsAvgSize(dir, data, mins[0], maxs[-1])
-PerfVsAvgSize(dir, data, 0, 2)
-PerfVsAvgSize(dir, data, 0, 4)
-PerfVsAvgSize(dir, data, 1, 2)
-PerfVsAvgSize(dir, data, 1, 4)
-PerfVsAvgSize(dir, data, 1, 8)
-PerfVsAvgSize(dir, data, 2, 2)
-PerfVsAvgSize(dir, data, 2, 4)
-PerfVsAvgSize(dir, data, 2, 8)
-PerfVsAvgSize(dir, data, 3, 2)
+PerfVsAvgSize(dir, data, 0.00, 2.0)
+PerfVsAvgSize(dir, data, 0.00, 4.0)
+PerfVsAvgSize(dir, data, 0.25, 2.0)
+PerfVsAvgSize(dir, data, 0.25, 4.0)
+PerfVsAvgSize(dir, data, 0.25, 8.0)
+PerfVsAvgSize(dir, data, 0.50, 2.0)
+PerfVsAvgSize(dir, data, 0.50, 4.0)
+PerfVsAvgSize(dir, data, 0.50, 8.0)
+PerfVsAvgSize(dir, data, 0.75, 2.0)

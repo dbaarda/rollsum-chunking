@@ -12,7 +12,7 @@ import os
 import pickle
 import random
 import sys
-from math import e, gamma
+from math import e, gamma, log
 from stats1 import Sample
 
 def solve(f, x0=-1.0e9, x1=1.0e9, e=1.0e-9):
@@ -512,10 +512,10 @@ def alltests(cls, tsize, bsize):
   data = Data(dsize, bsize*16, bsize*8, bsize*4)
   for bavg in (1,2,4,8,16,32,64):
     bavg_len = bsize * bavg
-    for bmin in (0, 1, 2, 3):
-      bmin_len = bavg_len * bmin // 4
-      for bmax in (16, 8, 4, 2):
-        bmax_len = bavg_len * bmax
+    for bmin in (0.0, 0.25, 0.50, 0.75):
+      bmin_len = int(bavg_len * bmin)
+      for bmax in (1.5, 2.0, 4.0, 8.0):
+        bmax_len = int(bavg_len * bmax)
         data.reset()
         chunker = cls.from_avg(bavg_len, bmin_len, bmax_len)
         result = runtest(chunker, data, 2*dsize)
@@ -533,6 +533,16 @@ chunkers = dict(
     weibullt2=WeibullT2Chunker,
     fastcdc=FastCDCChunker,
     fastweibull2=FastWeibull2Chunker)
+
+# Get the standard and (suspected) optimal chunker min fraction.
+minchunkerstd = 0.2
+minchunkeropt = log(2) / (1 + log(2))
+# Get the fastcdc standard avg and min fraction (min=8K, tgt=4K+min, max=64k).
+avgfastcdcstd = FastCDCChunker.get_avg_len(12*1024, 8*1024, 64*1024)
+minfastcdcstd = 8.0*1024 / avgfastcdcstd
+# Get the fastcdc optimized avg and min fraction (min=4K, tgt=4K+min, max=64k).
+avgfastcdcopt = FastCDCChunker.get_avg_len(8*1024, 4*1024, 64*1024)
+minfastcdcopt = 4.0*1024 / avgfastcdcstd
 
 
 def usage(code, error=None, *args):
