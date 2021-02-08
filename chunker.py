@@ -504,6 +504,19 @@ def tableadd(table, value, *args):
   table[args[-1]] = value
 
 
+def addtest(table, data, dsize, bsize, cls, bavg, bmin, bmax):
+  try:
+    table[bavg][bmin][bmax]
+  except KeyError:
+    bavg_len = bsize * bavg
+    bmin_len = int(bavg_len * bmin)
+    bmax_len = int(bavg_len * bmax)
+    data.reset()
+    chunker = cls.from_avg(bavg_len, bmin_len, bmax_len)
+    result = runtest(chunker, data, 2*dsize)
+    tableadd(table, result, bavg, bmin, bmax)
+
+
 def alltests(cls, tsize, bsize):
   """Get results for different avg,min,max chunker args."""
   results = {}
@@ -511,15 +524,13 @@ def alltests(cls, tsize, bsize):
   dsize = tsize*bsize*8
   data = Data(dsize, bsize*16, bsize*8, bsize*4)
   for bavg in (1,2,4,8,16,32,64):
-    bavg_len = bsize * bavg
-    for bmin in (0.0, 0.25, 0.50, 0.75):
-      bmin_len = int(bavg_len * bmin)
-      for bmax in (1.5, 2.0, 4.0, 8.0):
-        bmax_len = int(bavg_len * bmax)
-        data.reset()
-        chunker = cls.from_avg(bavg_len, bmin_len, bmax_len)
-        result = runtest(chunker, data, 2*dsize)
-        tableadd(results, result, bavg, bmin, bmax)
+    for bmin in (0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7):
+      addtest(results, data, dsize, bsize, cls, bavg, bmin, 8.0)
+    for bmax in (1.5, 2.0, 4.0, 8.0):
+      addtest(results, data, dsize, bsize, cls, bavg, 0.0, bmax)
+    addtest(results, data, dsize, bsize, cls, bavg, 0.5, 2.0)
+    addtest(results, data, dsize, bsize, cls, bavg, 0.2, 4.0)
+    addtest(results, data, dsize, bsize, cls, bavg, 0.5, 4.0)
   return (tsize, bsize, results)
 
 

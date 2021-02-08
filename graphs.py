@@ -42,8 +42,8 @@ def FileName(dir,stat,alg,avg,min,max):
   """
   #print("%r %r %r %r" % (alg, avg, min, max))
   if min not in tuple('txos'):
-    min = '%.2f' % min
-  if max not in tuple(('txos'):
+    min = '%.1f' % min
+  if max not in tuple('txos'):
     max = '%.1f' % max
   return '%s/%s-%s-%s-%s-%s.svg' % (dir, stat, alg, avg, min, max)
 
@@ -106,7 +106,7 @@ def SizeAvgVsAvgTarget(dir, data, alg, max):
   xs = avgs
   for min in mins:
     ys = [d[alg][avg][min][max][1].avg/(avg * bsize) for avg in avgs]
-    plt.plot(xs, ys, label="min=%.2fx" % min)
+    plt.plot(xs, ys, label="min=%.1fx" % min)
   ax = plt.gca()
   #ax.set_ylim(bottom=0)
   #ax.set_xlim(left=0, right=xs[-1])
@@ -116,7 +116,7 @@ def SizeAvgVsAvgTarget(dir, data, alg, max):
           'size avg vs avg target for alg=%s,max=%.1fx' % (alg,max),
           'avg target', 'size avg multiple of avg', xticks=xs)
 
-def PerfVsMinLimit(dir, data, alg, max):
+def PerfVsMinLimitByAvg(dir, data, alg, max):
   """Plot how deduplication peformance varys with min limit."""
   d = data[alg]
   xs = mins
@@ -132,7 +132,7 @@ def PerfVsMinLimit(dir, data, alg, max):
           'Deduplication vs min limit for alg=%s,max=%.1fx' % (alg,max),
           'min limit fraction of avg', 'found %') #, xticks=xs)
 
-def PerfVsMaxLimit(dir, data, alg, min):
+def PerfVsMaxLimitByAvg(dir, data, alg, min):
   """Plot how deduplication peformance varys with max limit."""
   d = data[alg]
   xs = maxs
@@ -145,8 +145,24 @@ def PerfVsMaxLimit(dir, data, alg, min):
   plt.xscale('log')
   #plt.yscale('log')
   saveplt(FileName(dir, 'perf', alg, 't', min, 'x'),
-          'Deduplication vs max limit for alg=%s,min=%.2fx' % (alg,min),
+          'Deduplication vs max limit for alg=%s,min=%.1fx' % (alg,min),
           'max limit multiple of avg', 'found %', xticks=xs)
+
+def PerfVsMinLimitByAlg(dir, data, avg, max):
+  """Plot how deduplication peformance varys with min limit."""
+  d = data
+  xs = mins
+  for alg in algs:
+    ys = [d[alg][avg][min][max][0]*100.0 for min in mins]
+    plt.plot(xs, ys, label="alg=%s" % alg)
+  ax = plt.gca()
+  ax.set_ylim(bottom=0)
+  ax.set_xlim(left=0, right=xs[-1])
+  #plt.xscale('log')
+  #plt.yscale('log')
+  saveplt(FileName(dir, 'perf', 't', avg, 'x', max),
+          'Deduplication vs min limit for avg=%s,max=%.1fx' % (avg,max),
+          'min limit fraction of avg', 'found %') #, xticks=xs)
 
 def PerfVsAvgSize(dir, data, min, max):
   """Plot how deduplication peformance varys with avg size."""
@@ -161,7 +177,7 @@ def PerfVsAvgSize(dir, data, min, max):
   plt.xscale('log')
   #plt.yscale('log')
   saveplt(FileName(dir, 'perf', 't', 'x', min, max),
-          'Deduplication vs avg target for min=%.2fx,max=%.1fx' % (min, max),
+          'Deduplication vs avg target for min=%.1fx,max=%.1fx' % (min, max),
           'avg size', 'found %', xticks=avgs)
 
 dir = sys.argv[1] if len(sys.argv) > 1 else '.'
@@ -185,19 +201,15 @@ min0 = avg0[mins[0]]
 maxs = sorted(min0)
 
 for alg in algs:
-  PerfVsMinLimit(dir, data, alg, maxs[-1])
-  PerfVsMaxLimit(dir, data, alg, mins[0])
-  SizeAvgVsAvgTarget(dir, data, alg, maxs[0])
+  PerfVsMinLimitByAvg(dir, data, alg, maxs[-1])
+  PerfVsMaxLimitByAvg(dir, data, alg, mins[0])
+  #SizeAvgVsAvgTarget(dir, data, alg, maxs[0])
   SizeAvgVsAvgTarget(dir, data, alg, maxs[-1])
-SizeMaxVsMinLimit(dir, data, avgs[0], maxs[-1])
+#SizeMaxVsMinLimit(dir, data, avgs[0], maxs[-1])
 SizeDevVsMinLimit(dir, data, avgs[0], maxs[-1])
-PerfVsAvgSize(dir, data, mins[0], maxs[-1])
-PerfVsAvgSize(dir, data, 0.00, 2.0)
-PerfVsAvgSize(dir, data, 0.00, 4.0)
-PerfVsAvgSize(dir, data, 0.25, 2.0)
-PerfVsAvgSize(dir, data, 0.25, 4.0)
-PerfVsAvgSize(dir, data, 0.25, 8.0)
-PerfVsAvgSize(dir, data, 0.50, 2.0)
-PerfVsAvgSize(dir, data, 0.50, 4.0)
-PerfVsAvgSize(dir, data, 0.50, 8.0)
-PerfVsAvgSize(dir, data, 0.75, 2.0)
+PerfVsMinLimitByAlg(dir, data, 8, maxs[-1])
+for min in (0.0, 0.2, 0.5, 0.6):
+  PerfVsAvgSize(dir, data, min, 8.0)
+PerfVsAvgSize(dir, data, 0.5, 2.0)
+PerfVsAvgSize(dir, data, 0.2, 4.0)
+PerfVsAvgSize(dir, data, 0.5, 4.0)
