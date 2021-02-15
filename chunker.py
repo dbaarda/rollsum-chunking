@@ -197,11 +197,12 @@ class Chunker(object):
     f(x) = L
     CDF(x) = 1 - e^-(L*x)
     PDF(x) = L*e^-(L*x)
-    mean = C + 1/L*(1-e^-(L*T))
+    mean = C + A*(1-e^-(L*T))
 
   Where;
 
-    L = 1/tgt_len
+    A = tgt_len
+    L = 1/A
     C = min_len
     T = max_len - min_len
 
@@ -236,7 +237,8 @@ class Chunker(object):
   @classmethod
   def get_tgt_len(cls, avg_len, min_len, max_len):
     """Get the tgt_len given an avg_len."""
-    return solve(lambda x: cls.get_avg_len(x, min_len, max_len) - avg_len, 0.0)
+    return solve(lambda x: cls.get_avg_len(x, min_len, max_len) - avg_len,
+                 x0=0.0, x1=2.0**32, e=0.5)
 
   def reset(self):
     self.blocks = {}
@@ -402,45 +404,90 @@ class WeibullT2Chunker(WeibullT0Chunker):
   P = 2
 
 
-class FastCDCChunker(Chunker):
-  """ FastCDCChunker class.
+class NC1Chunker(Chunker):
+  """ NC1Chunker class.
 
-  This implements FastCDC's chunking algorithm modified to use uses a 'h<p'
+  This implements FastCDC's NC chunking algorithm modified to use uses a 'h<p'
   hash judgment to support arbitrary tgt_len values.
 
-  The tgt_len for this chunker is the length where the probability steps up
-  from 1/4x to 4x the normal exponential distribution probablity. Note that
-  min_len doesn't offset this.
+  The tgt_len for this chunker is the "target length" to set the hazzard
+  function probabilities of 1/(tgt_len<<NC) and 1/(tgt_len>>NC). The
+  "transition point" where the probability steps up is set to tgt_len/2. Note
+  that this is offset by min_len, and copies what was evaluated in the FastCDC
+  paper.
+
+  The FastCDC paper is not entirely clear how it set things up for different
+  min_len values. It seems to have used a fixed 8K "normalized chunk size" for
+  the purpose of setting the hash judgement masks, and then set the transition
+  point to 4K past min_len. This is like setting the transition point to half
+  of the target length, which we copy here. However, this is a little strange
+  and unexplained given they evaluated normalized chunking's distribution for
+  min_len=0 with the transition point == target length.
+
+  Other common implementations based on
+  https://github.com/ronomon/deduplication set the hash judgment masks based
+  on the target length, and set the transition point to max(0, tgt_len -
+  1.5*min_len), which is also strange since it means you only use the first
+  mask if tgt_len > 2.5*min_len, and FastCDC recommends and gets it's speed
+  benefits when tgt_len <= 2*min_len.
+
+  The distribution's curves where x is measured from min_len and L is the
+  normal exponential distribution lambda parameter are;
+
+    f(x) = L1, x<=T1
+           L2, x>T1
+    CDF(x) = 1 - e^-(L1*x), x<=T1
+             1 - e^-(L1*T1 + L2*(x-T1)), x>T1
+    PDF(x) = L1*e^-(L1*x), x<=T1
+             L2*e^-(L1*T1 + L2*(x-T1)), x>T1
+    mean = C + A1 - e^-(L1*T1) * (A1 - A2*(1-e^-(L2*T2)))
+
+  Where;
+
+    A1 = tgt_len << NC
+    A2 = tgt_len >> NC
+    L1 = 1/A1
+    L2 = 1/A2
+    C = min_len
+    mid_len = min_len + tgt_len/2
+    T1 = mid_len - min_len
+    T2 = max_len - mid_len
+
+  This sets the "normalized chunking level" NC=1, but subclasses can override
+  it for different levels.
   """
+  NC=1
 
   @classmethod
   def get_avg_len(cls, tgt_len, min_len, max_len):
-    if tgt_len <= min_len:
-      # It's the same as Chunker with tgt_len/4.
-      return Chunker.get_avg_len(tgt_len // 4, min_len, max_len)
-    if tgt_len >= max_len:
-      # It's the same as Chunker with tgt_len*4.
-      return Chunker.get_avg_len(tgt_len * 4, min_len, max_len)
-    tgt_s = tgt_len * 4
-    tgt_l = tgt_len // 4
-    s_avg = min_len + tgt_s # avg length of first exponential distribution.
-    l_avg = tgt_len + tgt_l # avg length of second exponential distribution.
-    s_cut_avg = tgt_len + tgt_s # avg length of first dist cut after tgt_len.
-    l_cut_avg = max_len + tgt_l # avg length of second dist cut after max_len.
-    s_cut_fract = e**(float(min_len - tgt_len)/tgt_s) # fraction of first dist cut.
-    l_cut_fract = e**(float(tgt_len - max_len)/tgt_l) # fraction of second dist cut.
-    return s_avg + s_cut_fract*(l_avg - s_cut_avg + l_cut_fract*(max_len - l_cut_avg))
+    if tgt_len <= 0:
+      return min_len
+    A1 = tgt_len * 2.0**cls.NC
+    A2 = tgt_len / 2.0**cls.NC
+    mid_len = min(min_len + tgt_len / 2.0, max_len)  # transition point
+    z1 = (mid_len - min_len)/A1
+    z2 = (max_len - mid_len)/A2
+    return min_len + A1 - e**-z1 * (A1 - A2*(1-e**-z2))
+
+  def reset(self):
+    super(NC1Chunker, self).reset()
+    # Set the transition point where we change probabilities.
+    self.mid_len = self.min_len + self.tgt_len // 2
 
   def initblock(self):
     self.blk_len = 0
-    # prob is 1/4 of the normal tgt_len probability.
-    self.prob = 2**30 // self.tgt_len
+    self.prob = 2**32 // (self.tgt_len << self.NC)
 
   def incblock(self):
     self.blk_len += 1
-    if self.blk_len == self.tgt_len:
-      # prob is 4x the normal tgt_len probability.
-      self.prob = 2**34 // self.tgt_len
+    if self.blk_len == self.mid_len:
+      self.prob = 2**32 // (self.tgt_len >> self.NC)
+
+class NC2Chunker(NC1Chunker):
+  NC=2
+
+class NC3Chunker(NC1Chunker):
+  NC=3
 
 
 class FastWeibull2Chunker(Weibull2Chunker):
@@ -542,18 +589,20 @@ chunkers = dict(
     weibullt0=WeibullT0Chunker,
     weibullt1=WeibullT1Chunker,
     weibullt2=WeibullT2Chunker,
-    fastcdc=FastCDCChunker,
+    nc1=NC1Chunker,
+    nc2=NC2Chunker,
+    nc3=NC3Chunker,
     fastweibull2=FastWeibull2Chunker)
 
 # Get the standard and (suspected) optimal chunker min fraction.
 minchunkerstd = 0.2
 minchunkeropt = log(2) / (1 + log(2))
-# Get the fastcdc standard avg and min fraction (min=8K, tgt=4K+min, max=64k).
-avgfastcdcstd = FastCDCChunker.get_avg_len(12*1024, 8*1024, 64*1024)
-minfastcdcstd = 8.0*1024 / avgfastcdcstd
-# Get the fastcdc optimized avg and min fraction (min=4K, tgt=4K+min, max=64k).
-avgfastcdcopt = FastCDCChunker.get_avg_len(8*1024, 4*1024, 64*1024)
-minfastcdcopt = 4.0*1024 / avgfastcdcstd
+# Get the fastcdc standard avg and min fraction (min=8K, tgt=8K, max=64k).
+avgnc1std = NC1Chunker.get_avg_len(8*1024, 8*1024, 64*1024)
+minnc1std = 8.0*1024 / avgnc1std
+# Get the fastcdc optimized avg and min fraction (min=4K, tgt=8K, max=64k).
+avgnc1opt = NC1Chunker.get_avg_len(8*1024, 4*1024, 64*1024)
+minnc1opt = 4.0*1024 / avgnc1std
 
 
 def usage(code, error=None, *args):
