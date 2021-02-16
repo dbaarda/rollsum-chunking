@@ -525,12 +525,12 @@ FastCDC is not better than simple chunking with the same minimum and average
 chunk size. There is a better and as-fast hash judgement method. Simple
 exponential chunking has better deduplication than normalized-chunking, and is
 just as fast or faster with the same amount of cut-point-skipping. The
-deduplication benefits reported in the FastCDC paper are due to changes in the
-average chunk size and distribution, not the algorithm. The speed benefits are
-mostly due to increasing the minimum size limit (cut-point skipping). They
-never compared FastCDC against simple exponential chunking for the same
-average and minimum chunk size. If you do, it turns out simple exponential
-chunking gets better deduplication and is just as fast or faster.
+deduplication benefits reported in the FastCDC paper are mostly due to
+reducing the average chunk size. The speed benefits are mostly due to
+increasing the minimum size limit (cut-point skipping). They never compared
+FastCDC against simple exponential chunking for the same average and minimum
+chunk size. If you do, it turns out simple exponential chunking gets better
+deduplication and is just as fast or faster.
 
 FastCDC's hash judgement checking a random selection of hash bits are zero
 should give a worse distribution and not be faster than using simple ``hash <
