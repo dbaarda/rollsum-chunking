@@ -60,14 +60,14 @@ probably be tested to see if this ends up being better than using a left-shift.
 Hash Judgement
 --------------
 
-The FastCDC paper claims that `if !(hash & mask)` is measurably faster than
-`if (hash % tgt_len) == criteria` for the hash judgement criteria. This may be
-because `mod` operations are more expensive than `and` operations, but
+The FastCDC paper claims that ``if !(hash & mask)`` is measurably faster than
+``if (hash % tgt_len) == criteria`` for the hash judgement criteria. This may
+be because ``mod`` operations are more expensive than ``and`` operations, but
 provided tgt_len is a constant power of two most compilers should optimize it
-to an `and` operation anyway. So most of the speed benefits must be because
-under the hood the '!(...)' operation can simply check the zero-flag set by
-the `and` operation, whereas `(...) == criteria` requires an extra comparison
-operation.
+to an ``and`` operation anyway. So most of the speed benefits must be because
+under the hood the ``!(...)`` operation can simply check the zero-flag set by
+the ``and`` operation, whereas ``(...) == criteria`` requires an extra
+comparison operation.
 
 In FastCDC they use a zero-padded mask to use higher bits of the Gear rollsum
 to increase the sliding window size. However, we know that the Gear rollsum
@@ -197,24 +197,25 @@ NC
 
 This is the "normalized chunking" described in the FastCDC paper with
 different NC levels. The tgt_len for this chunker is the "target length" to
-set the two different hazzard function probabilities of 1/(tgt_len<<NC) and
-1/(tgt_len>>NC). The "transition point" where the probability steps up is set
-to min_len + tgt_len/2. Note that this copies what was evaluated in the
-FastCDC paper.
+set the two different hazzard function probabilities of ``prob1 =
+1/(tgt_len<<NC)`` and ``prob2 = 1/(tgt_len>>NC)``. The "transition point"
+where the probability steps up from prob1 to prob2 is set to ``mid_len =
+min_len + tgt_len/2``. Note that this copies what was evaluated in the FastCDC
+paper.
 
 The FastCDC paper is not entirely clear how it set things up for different
 min_len values. It seems to have used a fixed 8K "normalized chunk size" for
 the purpose of setting the hash judgement masks, and then set the transition
-point to min_len + 4K. This is like setting the transition point to half of
-the target length past min_len, which we copy here. However, this is a little
-strange and unexplained given they evaluated normalized chunking's
-distribution for min_len=0 with the transition point == target length.
+point to ``mid_len = min_len + 4K``. This is like setting the transition point
+to half of the target length past min_len, which we copy here. However, this
+is a little strange and unexplained given they evaluated normalized chunking's
+distribution for min_len=0 with the transition point = target length.
 
 Other common implementations based on https://github.com/ronomon/deduplication
 set the hash judgment masks based on the target length, and set the transition
-point to max(0, tgt_len - 1.5*min_len), which is also strange since it means
-you only use the first mask if tgt_len > 2.5*min_len, and FastCDC recommends
-and gets it's speed benefits when tgt_len <= 2*min_len.
+point to ``max(0, tgt_len - 1.5*min_len)``, which is also strange since it means
+you only use the first mask if ``tgt_len > 2.5*min_len``, and FastCDC recommends
+and gets it's speed benefits when ``tgt_len <= 2*min_len``.
 
 The distribution's curves where x is measured from min_len and L is the normal
 exponential distribution lambda parameter are::
@@ -246,11 +247,12 @@ Weibull
 
 This was an idea inspired by FastCDC's "normalized chunking" to give an even
 better approximation to a normal distribution using a "hazzard function" that
-increases with block lenght as a function `f(x) = M * x^P`. This turns out to
-be the same as a `Weibull Distribution
-<https://en.wikipedia.org/wiki/Weibull_distribution>`_ with k=P+1. Note that
-P=0 (AKA k=1) is identical to the normal Chunker exponential distribution. We
-name these Weibull<P> where P is the power used in the hazzard funciton.
+increases with block lenght as a function ``f(x) = M * x^P``. This turns out
+to be the same as a `Weibull Distribution
+<https://en.wikipedia.org/wiki/Weibull_distribution>`_ with ``k=P+1``. Note
+that P=0 (AKA k=1) is identical to the normal Chunker exponential
+distribution. We name these Weibull<P> where P is the power used in the
+hazzard funciton.
 
 The tgt_len for this chunker represents the distribution mean, not including
 the effects of min_len and max_len. The distribution's curves where x is
@@ -449,7 +451,7 @@ recommended min_len = tgt_len/4,  max_len=tgt_len*4.
 
 .. image:: data/perf-nc2-t-x-8.0.svg
 
-.. image:: data/perf-nc3t-x-8.0.svg
+.. image:: data/perf-nc3-x-8.0.svg
 
 For FastCDC's normalized chunking, deduplication declines as min_len is
 increased. There is perhaps a tiny improvement with NC1 upto min_len=0.3x, but
@@ -482,9 +484,9 @@ the same as the average-duplicate-run-length, we see the best deduplication is
 for chunker with min_len = 0.4x~0.5x. At lower min_len values other algorithms
 do better, but chunker clearly wins for min_len >= 0.4x. Note that increasing
 min_len increases chunker speed, so there is no insentive for setting it lower
-if it also reduces deduplication. It varys a little with min_len, but in
-general the order from worst to best is nc3, weibull2, nc2, weibull1,
-weibullt2, nc1, weibullt1, chunker.
+if it also reduces deduplication. The order from best to worst varys a little
+with min_len, but generally is nc3, weibull2, nc2, weibull1, weibullt2, nc1,
+weibullt1, chunker.
 
 .. image:: data/perf-t-1-x-8.0.svg
 
@@ -500,7 +502,7 @@ chunker always wins.
 
 For min_len=0.5x the comparison holds for all avg_len chunk sizes.
 
-.. image:: data/perf-t-x-0.5-8.0.svg
+.. image:: data/perf-t-x-0.5-2.0.svg
 
 If we reduce the max_len to 2x with min_len=0.5, chunker still wins, but the
 gap with the other algorithms closes, because their tighter distribution
@@ -508,6 +510,13 @@ curves ensures less truncation effects from a small max_len. However, this
 effect is still not enough to make it better than the simplest exponential
 chunker.
 
+So the simplest exponential chunker algorithm is the fastest and has the best
+deduplication, provided you set min_len large enough. For best deduplication
+and good speed you want to set ``min_len = tgt_len = avg_len/2, max_len >=
+5*tgt_len``. Larger min_len will give faster chunking, but it is at the cost
+of deduplication, becoming very expensive beyond ``min_len = 2*tgt_len =
+0.66*avg_len``. Smaller max_len can be used to reduce the large block size,
+but at the cost of deduplication.
 
 Summary
 =======
@@ -523,9 +532,9 @@ against simple exponential chunking for the same average and minimum chunk
 size. If you do, it turns out simple exponential chunking gets better
 deduplication and is just as fast or faster.
 
-FastCDC's hash judgement cheking a random selection of hash bits are zero
-should give a worse distribution and not be faster than using simple `hash <
-threshold` comparision, where `threshold = 2^32/tgt_size`. This also allows
+FastCDC's hash judgement checking a random selection of hash bits are zero
+should give a worse distribution and not be faster than using simple ``hash <
+threshold`` comparision, where ``threshold = 2^32/tgt_size``. This also allows
 for arbitrary non-power-of-2 target sizes. The Gear rollsum has the largest
 window-size (and thus most entropy and best distribution) in the most
 significant bits, which are better utilized in a comparison against a
@@ -536,18 +545,14 @@ has worse deduplication than simple exponential chunking with the same large
 minimum size. Fancier normalization algorithms can give a more normal
 distribution of chunk sizes, but this is always at the cost of deduplication.
 Surprisingly exponential chunking gets better deduplication as the minimum
-size is increased as a fraction of the average size. The optimal minimum size
-is the exponential distribution's median or 41% of the average size (min_size
-= 0.69*tgt_size), but 50% (min_size == tgt size) is nearly as good and gives
-more cut-point-skipping speed benefits. Larger minimum sizes give even more
-speed benefits, but the deduplication cost gets severe above about 66%
-(min_size = 2*tgt_size). These minimum sizes are way larger than is typically
-used with simple exponential chunking.
+size is increased as a fraction of the average size.
 
-The simplest exponential chunker algorithm is the fastest and has the best
-deduplication, provided you set min_len large enough. For best deduplication
-and good speed you want to set min_len = tgt_len = avg_len/2,
-max_len>=5*tgt_len. Larger min_len will give faster chunking, but it is at the
-cost of deduplication, becoming very expensive beyond
-min_len=2*tgt_len=0.66*avg_len. Smaller max_len can be used to reduce the
-large block size, but at the cost of deduplication.
+The simple exponential chunker is the fastest and has best deduplication for a
+target average block size provided it is used with the right min_len and
+max_len settings. The optimal minimum size is the exponential distribution's
+median or 0.41x of the average size (min_size = 0.69*tgt_size), but 0.5x
+(min_size == tgt size) is nearly as good and gives more cut-point-skipping
+speed benefits. Larger minimum sizes give even more speed benefits, but the
+deduplication cost gets severe above about 0.66x (min_size = 2*tgt_size).
+These minimum sizes are way larger than is typically used with simple
+exponential chunking.
