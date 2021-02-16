@@ -105,8 +105,8 @@ Chunk distribution
 
 FastCDC pointed out that the simple chunker algorithm actually produces chunk
 sizes with an exponential distribution that has average chunk size of
-min_len+tgt_len, so the tgt_len, which many people call the average length, is
-not really the average length.
+``avg_len = min_len + tgt_len``, so the tgt_len, which many people call the
+average length, is not really the average length.
 
 FastCDC introduced their "normalized chunking" algorithm to give a better
 approximation of a normal distribution, and claimed it allowed for larger
@@ -451,13 +451,13 @@ recommended min_len = tgt_len/4,  max_len=tgt_len*4.
 
 .. image:: data/perf-nc2-t-x-8.0.svg
 
-.. image:: data/perf-nc3-x-8.0.svg
+.. image:: data/perf-nc3-t-x-8.0.svg
 
 For FastCDC's normalized chunking, deduplication declines as min_len is
 increased. There is perhaps a tiny improvement with NC1 upto min_len=0.3x, but
 it declines after that. For nc2 and nc3 deduplication just declines more and
 more as min_len increases. This is surprising given the FastCDC paper's claim
-that normalized chunking allowed min_len and thus cut-point-skipping to be
+that normalized chunking allowed min_len (and thus cut-point-skipping) to be
 increased with reduced effects on deduplication. However, that paper never
 compared them for the same average chunk length.
 
@@ -479,11 +479,11 @@ starts to decline.
 
 .. image:: data/perf-t-16-x-8.0.svg
 
-Comparing the algorithms performance against each other vs min_len for avg_len
-the same as the average-duplicate-run-length, we see the best deduplication is
-for chunker with min_len = 0.4x~0.5x. At lower min_len values other algorithms
-do better, but chunker clearly wins for min_len >= 0.4x. Note that increasing
-min_len increases chunker speed, so there is no insentive for setting it lower
+Comparing the algorithm's performance against each other vs min_len for
+avg_len = average-duplicate-run-length, we see the best deduplication is for
+chunker with min_len = 0.4x~0.5x. At lower min_len values other algorithms do
+better, but chunker clearly wins for min_len >= 0.4x. Note that increasing
+min_len increases chunker speed, so there is no incentive for setting it lower
 if it also reduces deduplication. The order from best to worst varys a little
 with min_len, but generally is nc3, weibull2, nc2, weibull1, weibullt2, nc1,
 weibullt1, chunker.
@@ -526,11 +526,11 @@ chunk size. There is a better and as-fast hash judgement method. Simple
 exponential chunking has better deduplication than normalized-chunking, and is
 just as fast or faster with the same amount of cut-point-skipping. The
 deduplication benefits reported in the FastCDC paper are due to changes in the
-average chunk size and distribution. The speed benefits are due to increasing
-the minimum size limit (cut-point skipping). They never compared FastCDC
-against simple exponential chunking for the same average and minimum chunk
-size. If you do, it turns out simple exponential chunking gets better
-deduplication and is just as fast or faster.
+average chunk size and distribution, not the algorithm. The speed benefits are
+mostly due to increasing the minimum size limit (cut-point skipping). They
+never compared FastCDC against simple exponential chunking for the same
+average and minimum chunk size. If you do, it turns out simple exponential
+chunking gets better deduplication and is just as fast or faster.
 
 FastCDC's hash judgement checking a random selection of hash bits are zero
 should give a worse distribution and not be faster than using simple ``hash <
@@ -545,7 +545,7 @@ has worse deduplication than simple exponential chunking with the same large
 minimum size. Fancier normalization algorithms can give a more normal
 distribution of chunk sizes, but this is always at the cost of deduplication.
 Surprisingly exponential chunking gets better deduplication as the minimum
-size is increased as a fraction of the average size.
+size is increased well beyond the normally recommended values.
 
 The simple exponential chunker is the fastest and has best deduplication for a
 target average block size provided it is used with the right min_len and
