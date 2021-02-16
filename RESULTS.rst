@@ -184,11 +184,12 @@ are::
     f(x) = L
     CDF(x) = 1 - e^-(L*x)
     PDF(x) = L*e^-(L*x)
-    avg_len = C + 1/L*(1-e^-(L*T))
+    avg_len = C + A*(1-e^-(L*T))
 
 Where::
 
-    L = 1/tgt_len
+    A = tgt_len
+    L = 1/A
     C = min_len
     T = max_len - min_len
 
