@@ -478,16 +478,22 @@ These are an improvement over Weibull's response to min_len, with nearly no
 impact on deduplication for min_len up to 0.5x and 0.4x respectively before it
 starts to decline.
 
-.. image:: data/perf-t-16-x-8.0.svg
+.. image:: data/perf-t-8-x-8.0.svg
 
 Comparing the algorithm's performance against each other vs min_len for
-avg_len = average-duplicate-run-length, we see the best deduplication is for
+avg_len = average-duplicate-run-length/2, we see the best deduplication is for
 chunker with min_len = 0.4x~0.5x. At lower min_len values other algorithms do
 better, but chunker clearly wins for min_len >= 0.4x. Note that increasing
 min_len increases chunker speed, so there is no incentive for setting it lower
 if it also reduces deduplication. The order from best to worst varys a little
 with min_len, but generally is nc3, weibull2, nc2, weibull1, weibullt2, nc1,
 weibullt1, chunker.
+
+.. image:: data/perf-t-16-x-8.0.svg
+
+For a longer average block length equal to the average-duplicate-run-length,
+chunker is more clearly in front, and the peak deduplication shifts left to
+min_len = 0.3x, but 0.4x and even 0.5x are still competitive.
 
 .. image:: data/perf-t-1-x-8.0.svg
 
