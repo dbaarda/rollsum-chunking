@@ -188,7 +188,7 @@ if dir in ("-?", "-h", "--help", None):
 # This builds a results dict structured as;
 # results[alg][avg][min][max] = (perf, blkstats, dupstats)
 #algs = sorted(chunkers)
-algs = 'chunker weibull1 weibull2 weibullt1 weibullt2 nc1 nc2 nc3'.split()
+algs = 'chunker weibull1 weibull2 weibullt1 weibullt2 nc1 nc2 nc3 rc4'.split()
 data = {}
 for alg in algs:
   tsize, bsize, data[alg] = GetFileData(dir, alg)
@@ -201,16 +201,19 @@ min0 = avg0[mins[0]]
 maxs = sorted(min0)
 
 for alg in algs:
+  PerfVsMinLimitByAvg(dir, data, alg, maxs[0])
   PerfVsMinLimitByAvg(dir, data, alg, maxs[-1])
-  PerfVsMaxLimitByAvg(dir, data, alg, mins[0])
-  #SizeAvgVsAvgTarget(dir, data, alg, maxs[0])
+  PerfVsMaxLimitByAvg(dir, data, alg, 0.0)
+  PerfVsMaxLimitByAvg(dir, data, alg, 0.5)
+  SizeAvgVsAvgTarget(dir, data, alg, maxs[0])
   SizeAvgVsAvgTarget(dir, data, alg, maxs[-1])
 #SizeMaxVsMinLimit(dir, data, avgs[0], maxs[-1])
 SizeDevVsMinLimit(dir, data, avgs[0], maxs[-1])
 for avg in avgs:
+  PerfVsMinLimitByAlg(dir, data, avg, maxs[0])
   PerfVsMinLimitByAlg(dir, data, avg, maxs[-1])
 for min in mins:
+  PerfVsAvgSize(dir, data, min, maxs[0])
   PerfVsAvgSize(dir, data, min, maxs[-1])
 PerfVsAvgSize(dir, data, 0.5, 2.0)
-PerfVsAvgSize(dir, data, 0.2, 4.0)
 PerfVsAvgSize(dir, data, 0.5, 4.0)

@@ -5,7 +5,7 @@ from __future__ import print_function
 inf = float('inf')
 
 class Sample(object):
-  
+
   def __init__(self, data=None):
     self.num = 0
     self.sum = 0
@@ -14,14 +14,14 @@ class Sample(object):
     self.max = -inf
     if data:
       self.update(data)
-  
+
   def add(self, v):
     self.num += 1
     self.sum += v
     self.sum2 += v*v
     self.min = min(self.min, v)
     self.max = max(self.max, v)
-      
+
   def update(self, data):
     for v in data:
       self.add(v)
@@ -29,15 +29,15 @@ class Sample(object):
   @property
   def avg(self):
     return float(self.sum) / self.num
-  
+
   @property
   def var(self):
     return (self.sum2 - float(self.sum * self.sum) / self.num) / self.num
-  
+
   @property
   def dev(self):
     return self.var ** 0.5
-  
+
   def __repr__(self):
     return "Sample()"
 
@@ -47,6 +47,13 @@ class Sample(object):
           self.num, self.sum, self.min, self.avg, self.max, self.dev)
     else:
       return "num=0 sum=0"
+
+  def getstate(self):
+    return (self.num, self.sum, self.sum2, self.min, self.max)
+
+  def setstate(self, state):
+    self.num, self.sum, self.sum2, self.min, self.max = state
+
 
 #class Histogram:
 #       def Add(i):

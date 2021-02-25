@@ -5,7 +5,7 @@ RollsumChunking modelling.
 This will run tests for the specified chunker with different avg/min/max
 length settings, and dump the summary data into a file in a directory.
 
-Usage: %(cmd)s <chunker|weibull0|weibull1|weibull2|fastcdc|fastweibull2> [dir]
+Usage: %(cmd)s <chunker|weibull[0-2]|weibullt[0-2]|nc[1-3]|rc4|fastweibull2> [dir]
 """
 from __future__ import print_function
 import os
@@ -96,6 +96,12 @@ class RandIter(object):
     self.value = (pow(a, n, m)*self.value + (pow(a, n, ma) - 1) // a1 * c) & self.b
     return self.value
 
+  def getstate(self):
+    return (self.value, self.count, self.dat_n)
+
+  def setstate(self, state):
+    self.value, self.count, self.dat_n = state
+
 
 class Data(object):
   """ Data source with rollsums and block hashes.
@@ -173,6 +179,22 @@ class Data(object):
     """ Get a strong hash of the past l bytes and reset for a new block. """
     blkh, self.blkh = self.blkh, 0
     return blkh
+
+  def getstate(self):
+    return (self.tot_c, self.dup_c, self.blkh,
+            self.cpy_n, self.ins_n, self.del_n,
+            self.dat.getstate(), self.ins.getstate(), self.mod.getstate(),
+            self.cpystats.getstate(), self.insstats.getstate(), self.delstats.getstate())
+
+  def setstate(self, state):
+    (self.tot_c, self.dup_c, self.blkh, self.cpy_n, self.ins_n, self.del_n,
+     dat, ins, mod, cpystats, insstats, delstats) = state
+    self.dat.setstate(dat)
+    self.ins.setstate(ins)
+    self.mod.setstate(mod)
+    self.cpystats.setstate(cpystats)
+    self.insstats.setstate(insstats)
+    self.delstats.setstate(delstats)
 
   def __repr__(self):
     return "Data(olen=%s, clen=%s, ilen=%s, dlen=%s, seed=%s)" % (
@@ -267,6 +289,25 @@ class Chunker(object):
     if n > 1:
       self.dupstats.add(l)
     self.initblock()
+
+  def scan(self, data, len):
+    """Scan for whole chunks upto at least len offset in data."""
+    # keep a reference to the data for chunkers that might need it.
+    self.data = data
+    # Stop after we've read enough data and finished a whole block.
+    while data.tot_c < len or self.blk_len:
+      if self.isblock(data.getroll()):
+        self.addblock(data.gethash())
+    return data.tot_c
+
+  def getstate(self):
+    """Get a mid-block-point state snapshot."""
+    return (self.blk_len, self.data.getstate())
+
+  def setstate(self, state):
+    """Restore a saved mid-block-point state snapshot."""
+    self.blk_len, data = state
+    self.data.setstate(data)
 
   def __repr__(self):
     return "%s(tgt_len=%s, min_len=%s, max_len=%s)" % (
@@ -490,6 +531,63 @@ class NC3Chunker(NC1Chunker):
   NC=3
 
 
+class RC4Chunker(Chunker):
+  """ RC4Chunker Class.
+
+  This implements MicroSofts "Regression Chunker" algorithm modified to use
+  uses a 'h<p' hash judgment to support arbitrary tgt_len values.
+
+  This implementation use k=4, but subclasses can override this.
+  """
+  K=4
+
+  @classmethod
+  def get_avg_len(cls, tgt_len, min_len, max_len):
+    """Get the avg_len given a tgt_len."""
+    if tgt_len <= 0:
+      return min_len
+    z = (max_len - min_len)/tgt_len
+    p = d = e**-z
+    # Get average length minus the chopped-off bit past max_len
+    a = min_len + tgt_len - d*(max_len + tgt_len)
+    # Add reverse-decaying regressions minus the bits before min_len.
+    for k in range(cls.K):
+      a += p * ((max_len - tgt_len) - d*(min_len - tgt_len))
+      p *= d
+      tgt_len /= 2
+      d *= d
+    # Add the final bit truncated to max_len.
+    return a + p * max_len
+
+  def initblock(self):
+    self.blk_len = 0
+    self.rprob = 2**(32 + self.K) // self.tgt_len
+    self.rstate = None
+
+  def isblock(self, r):
+    """ Checks if rollsum r is a break point and increments the block. """
+    self.incblock()
+    if self.blk_len < self.min_len:
+      # Too small, not a block.
+      return False
+    elif self.blk_len >= self.max_len:
+      # Too big, is a block, and restore to regression point if it's better.
+      if r >= self.rprob and self.rstate:
+        # Restore the regression state.
+        self.setstate(self.rstate)
+      return True
+    elif r < self.rprob:
+      # A better regression state or possible block.
+      if r < self.prob:
+        # It is a block!
+        return True
+      # Update the regression state and adjust rprob.
+      self.rstate = self.getstate()
+      while r < (self.rprob >> 1):
+        self.rprob >>= 1
+    return False
+
+
 class FastWeibull2Chunker(Weibull2Chunker):
   """ FastWeibull2Chunker class.
 
@@ -526,11 +624,8 @@ class FastWeibull2Chunker(Weibull2Chunker):
 
 
 def runtest(chunker, data, data_len):
-  blocks = {}
   # Stop after we've read enough data and finished a whole block.
-  while data.tot_c < data_len or chunker.blk_len:
-    if chunker.isblock(data.getroll()):
-      chunker.addblock(data.gethash())
+  chunker.scan(data, data_len)
   print(data)
   print(chunker)
   assert data.tot_c == chunker.blkstats.sum
@@ -573,11 +668,10 @@ def alltests(cls, tsize, bsize):
   for bavg in (1,2,4,8,16,32,64):
     for bmin in (0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7):
       addtest(results, data, dsize, bsize, cls, bavg, bmin, 8.0)
+      addtest(results, data, dsize, bsize, cls, bavg, bmin, 1.5)
     for bmax in (1.5, 2.0, 4.0, 8.0):
       addtest(results, data, dsize, bsize, cls, bavg, 0.0, bmax)
-    addtest(results, data, dsize, bsize, cls, bavg, 0.5, 2.0)
-    addtest(results, data, dsize, bsize, cls, bavg, 0.2, 4.0)
-    addtest(results, data, dsize, bsize, cls, bavg, 0.5, 4.0)
+      addtest(results, data, dsize, bsize, cls, bavg, 0.5, bmax)
   return (tsize, bsize, results)
 
 
@@ -592,6 +686,7 @@ chunkers = dict(
     nc1=NC1Chunker,
     nc2=NC2Chunker,
     nc3=NC3Chunker,
+    rc4=RC4Chunker,
     fastweibull2=FastWeibull2Chunker)
 
 # Get the standard and (suspected) optimal chunker min fraction.
@@ -620,5 +715,5 @@ if __name__ == '__main__':
   if cmd not in chunkers:
     usage(1, "Error: invalid chunker argument %r.", cmd)
   cls = chunkers[cmd]
-  results = alltests(cls, tsize=10000, bsize=1024)
+  results = alltests(cls, tsize=1000, bsize=1024)
   pickle.dump(results, open('%s/%s.dat' % (dir,cmd), 'wb'))
