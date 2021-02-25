@@ -164,6 +164,22 @@ def PerfVsMinLimitByAlg(dir, data, avg, max):
           'Deduplication vs min limit for avg=%s,max=%.1fx' % (avg,max),
           'min limit fraction of avg', 'found %') #, xticks=xs)
 
+def PerfVsMaxLimitByAlg(dir, data, avg, min):
+  """Plot how deduplication peformance varys with min limit."""
+  d = data
+  xs = maxs
+  for alg in algs:
+    ys = [d[alg][avg][min][max][0]*100.0 for max in maxs]
+    plt.plot(xs, ys, label="alg=%s" % alg)
+  ax = plt.gca()
+  ax.set_ylim(bottom=0)
+  #ax.set_xlim(left=0, right=xs[-1])
+  plt.xscale('log')
+  #plt.yscale('log')
+  saveplt(FileName(dir, 'perf', 't', avg, min, 'x'),
+          'Deduplication vs max limit for avg=%s,min=%.1fx' % (avg,min),
+          'max limit fraction of avg', 'found %', xticks=xs)
+
 def PerfVsAvgSize(dir, data, min, max):
   """Plot how deduplication peformance varys with avg size."""
   d = data
@@ -212,6 +228,7 @@ SizeDevVsMinLimit(dir, data, avgs[0], maxs[-1])
 for avg in avgs:
   PerfVsMinLimitByAlg(dir, data, avg, maxs[0])
   PerfVsMinLimitByAlg(dir, data, avg, maxs[-1])
+  PerfVsMaxLimitByAlg(dir, data, avg, 0.5)
 for min in mins:
   PerfVsAvgSize(dir, data, min, maxs[0])
   PerfVsAvgSize(dir, data, min, maxs[-1])
