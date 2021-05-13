@@ -546,18 +546,36 @@ class RC4Chunker(Chunker):
     """Get the avg_len given a tgt_len."""
     if tgt_len <= 0:
       return min_len
-    z = (max_len - min_len)/tgt_len
-    p = d = e**-z
-    # Get average length minus the chopped-off bit past max_len
-    a = min_len + tgt_len - d*(max_len + tgt_len)
-    # Add reverse-decaying regressions minus the bits before min_len.
-    for k in range(cls.K):
-      a += p * ((max_len - tgt_len) - d*(min_len - tgt_len))
-      p *= d
-      tgt_len /= 2
-      d *= d
-    # Add the final bit truncated to max_len.
-    return a + p * max_len
+    # This is a mystery scaling factor for c that somehow works.
+    M = 0.85
+    A = tgt_len
+    C = min_len
+    T = max_len - C  # regression distance between min_len and max_len.
+    # Iteratively solve for "c" offset to blocks after regressions.
+    ck = [0.0] * cls.K  # additional regression length per regression.
+    a, da = 0, 1
+    while abs(da) >= 0.001:
+      da = a                   # store old a in da for calculating da later.
+      Ak = A                   # tgt_len for each recursion.
+      cr = sum(ck)             # cumulative regression for each recursion.
+      dr = e**-((T-cr)/A)      # cumulative decay for each recursion.
+      dC = e**-(C/A)           # reverse decay fraction after C.
+      a = cr + A - dr*(T + A)  # avg len past C with max_len chopped off.
+      # Add reverse-decaying regressions minus the bits before C+ck.
+      for k in range(cls.K):
+        dk = e**-((T-cr)/Ak)   # regression decay past cr.
+        a += dr*(T - Ak + dk*(Ak - cr))
+        #print("Ak=%s dr=%s cr=%s dk=%s ck=%s a=%s" % (Ak, dr, cr, dk, ck[k], a))
+        cr, ck[k] = cr - ck[k], M*dr*(dC*Ak - dk*(T - cr - C + Ak)) if T>C else 0.0
+        dr *= dk
+        Ak /= 2
+        dC *= dC
+      # Add the final bit truncated to max_len.
+      a += dr*T
+      # Update the average length change and iterate.
+      da -= a
+      #print("tgt=%s min=%s max=%s a=%s da=%s" % (tgt_len, min_len, max_len, a, da))
+    return C + a
 
   def initblock(self):
     self.blk_len = 0
@@ -658,6 +676,9 @@ def addtest(table, data, dsize, bsize, cls, bavg, bmin, bmax):
     result = runtest(chunker, data, 2*dsize)
     tableadd(table, result, bavg, bmin, bmax)
 
+bavgs = (1, 2, 4, 8, 16, 32, 64)
+bmins = (0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7)
+bmaxs = (1.25, 1.5, 2.0, 4.0, 8.0)
 
 def alltests(cls, tsize, bsize):
   """Get results for different avg,min,max chunker args."""
@@ -665,13 +686,18 @@ def alltests(cls, tsize, bsize):
   # Data size is tsize times the average 8*bsize blocks.
   dsize = tsize*bsize*8
   data = Data(dsize, bsize*16, bsize*8, bsize*4)
-  for bavg in (1,2,4,8,16,32,64):
-    for bmin in (0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7):
+  for bavg in bavgs:
+    for bmin in bmins:
       addtest(results, data, dsize, bsize, cls, bavg, bmin, 8.0)
-      addtest(results, data, dsize, bsize, cls, bavg, bmin, 1.5)
-    for bmax in (1.5, 2.0, 4.0, 8.0):
+      addtest(results, data, dsize, bsize, cls, bavg, bmin, 1.25)
+    for bmax in bmaxs: 
       addtest(results, data, dsize, bsize, cls, bavg, 0.0, bmax)
-      addtest(results, data, dsize, bsize, cls, bavg, 0.5, bmax)
+    addtest(results, data, dsize, bsize, cls, bavg, 0.5, 2.0)
+  bavg = 8.0
+  for bmin in bmins:
+    addtest(results, data, dsize, bsize, cls, bavg, bmin, 2.0)
+  for bmax in bmaxs:
+    addtest(results, data, dsize, bsize, cls, bavg, 0.5, bmax)
   return (tsize, bsize, results)
 
 
@@ -699,6 +725,20 @@ minnc1std = 8.0*1024 / avgnc1std
 avgnc1opt = NC1Chunker.get_avg_len(8*1024, 4*1024, 64*1024)
 minnc1opt = 4.0*1024 / avgnc1std
 
+# This code is to quicly test RC4 avg_len calculations.
+# tsize=1000
+# min = 0.0
+# avg = 1.0
+# for min in (0.0, 0.2, 0.4, 0.6):
+#   for avg in (2/3, 4/5, 1.0, 2.0, 3.0):
+#     c = RC4Chunker(int((1.0-min)*avg*1024), int(min*1024), 1024)
+#     d = Data(tsize*8*1024, 16*1024, 8*1024, 4*1024)
+#     runtest(c, d, 2*tsize*8*1024)
+#     num_b = c.blkstats.num
+#     avg_b = c.blkstats.avg
+#     print(avg_b / c.avg_len)
+#     print()
+# exit(1)
 
 def usage(code, error=None, *args):
   if error:
@@ -715,5 +755,5 @@ if __name__ == '__main__':
   if cmd not in chunkers:
     usage(1, "Error: invalid chunker argument %r.", cmd)
   cls = chunkers[cmd]
-  results = alltests(cls, tsize=1000, bsize=1024)
+  results = alltests(cls, tsize=10000, bsize=1024)
   pickle.dump(results, open('%s/%s.dat' % (dir,cmd), 'wb'))

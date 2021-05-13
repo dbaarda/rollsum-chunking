@@ -6,9 +6,12 @@ Overview
 ========
 
 These are tests for different chunker distribution agorithms inspired by the
-'normalized chunking' in FastCDC. They test only the chunker distribution
-algorithms using a fast and flexible judgement criteria with a simulated
-rollsum.
+'normalized chunking' in `FastCDC
+<https://www.usenix.org/system/files/conference/atc16/atc16-paper-xia.pdf>`_,
+and 'regression chunking' in `Primary Data Deduplication
+<https://www.usenix.org/system/files/conference/atc12/atc12-final293.pdf>`_.
+They test only the chunker distribution algorithms using a fast and flexible
+judgement criteria with a simulated rollsum.
 
 Rollsum Algorithms
 ------------------
@@ -20,7 +23,7 @@ to be assessed without being affected by weaknesses and degenerate cases in
 real rollsum algorithms.
 
 For a real rollsum there are several options. Testing and analysis of rollsums
-can be found `here
+can be found in the `dbaarda/rollsum-tests results
 <https://github.com/dbaarda/rollsum-tests/blob/master/RESULTS.rst>`_.
 CyclicPoly (AKA BuzzHash) is strong and fast but requires a mapping table.
 RabinKarp (AKA PolyHash) is stronger and probably just as fast.
@@ -300,6 +303,153 @@ Where::
     M = k/L^k
     C = min_len
     T = max_len - min_len
+
+RC4
+---
+
+The `Primary Data Deduplication`_ paper introduces "Regression Chunking" as a
+way to reduce the problems of max_len truncations. Instead of just truncating
+chunks at max_len, it "goes back" looking for a chunk boundary before the
+limit with a weaker boundary criteria. It uses bit-masks, and the weaker
+criteria uses a mask with N-k bits for k=1..4. This is implemented by keeping
+all the k=1..4 last weak-matches as it scans, then using the last of the
+strongest matches found when it hits max_len. This has the effect of
+re-destributing the tail max_len chunks over smaller chunk lengths, giving a
+nearly uniform distribution according to their graphs.
+
+Also worth noting is they use chunker settings min_len=32K, tgt_len=64K,
+max_len=128K and get an average length of about 80K after Regression Chunking.
+These settings are equivalent to about min_len=0.33x, max_len=1.33x, which is
+a very low max_len setting. Their doc talks about this giving about 14%
+truncations without regression chunking, but they seem to miss the fact that
+min_len offsets the real average, and actually they would have got e^-1.5 =
+22%, truncations which would make some kind of truncation handling
+improvements even more necessary.
+
+Figuring out the avg_len from tgt_len/min_len/max_len is tricky. It's similar
+to simple Exponential Chunking except for how truncated blocks are handled.
+For truncation, it doesn't just use max_len but instead uses a
+reverse-exponential decay backwards from max_len with the judgement critieria
+relaxed 2x. The tail of this reverse exponential distribution is then trucated
+at min_len and redistributed using another reverse-exponential distribution
+from max_len with the judgement criteria further relaxed 2x, and this is
+repeated k times. Only the final truncation after k reverse-exponential
+distributions is set to max_len. Note in theory the first reverse-distribution
+should decay 2x as fast as the initial forward-exponential-distribution, but
+since we already know that the range between min_len to max_len doesn't have
+anything that matches the the initial judgement criteria, relaxing it 2x
+actually gives us the same decay rate. Similarly for each iteration of the
+reverse-distribution we already know that it doesn't match half of the 2x
+relaxed judgement criteria. This gives the following equation for avg_len::
+
+    d = e^(-T/A)
+    avg_len = C + A - d*(T+A)
+    for i in range(k):
+      avg_len += d * (T - A*(1-d))
+      A /= 2
+      d *= d
+    avg_len += d*T
+
+Where::
+
+    A = tgt_len
+    C = min_len
+    T = max_len - min_len
+
+Except when tested, the avg_len was pretty consistently 10% larger than this
+predicted for max_len=1.5x, min_len=0. As min_len increased, this prediction
+got better, and for min_len>=0.6 it was accurate. It took a lot of thinking
+and testing to figure out that this calculation doesn't take into account what
+regressing back from max_len to an earlier weaker judgement criteria break
+point does to the NEXT block. It means that the next block is known to not
+have a break point that matches the stronger judgement criteria in the start
+part that was regressed back over. This means there are less short blocks, and
+behaves similar to an extra min_len setting, shifting the exponential
+distribution to the right. This shifting also changes the fraction that gets
+truncated and regressed, further impacting on the next block. For each
+regression iteration, there is also an extra "regression truncation" at the
+start of the block known to not contain any matches at the recursion's match
+criteria, and this distance is different for each regression. Solving for this
+effect is tricky, but can be approximated by a c additional offset to min_len,
+and cr0..crN additional offsets for each regression. It looks a bit like
+this::
+
+Initial search
+                        |----A------->                 < forward search
+|<--------------------max_len----------------------->|
+|<---C--->|<----------------T----------------------->|
+          |<-----c----->|<-----------t-------------->|
+          |<---------a--------------->|
+
+1st regression
+                                  <-----A1-----------| < backwards search
+          |<---cr1--->|<------------t1-------------->|
+          |<-------a1----------->|<--------r1------->|
+                                |<---c1--->|<---C--->|
+
+
+2nd regresson
+                                    <-----A2---------| < backwards search
+          |<--cr2-->|<--------------t2-------------->|
+          |<----------a2---------->|<------r2------->|
+                                  |<--c2-->|<---C--->|
+        :                      :
+
+nth regression
+                                      <-----AN-------| < backwards search
+          |<-crN->|<--------------tN---------------->|
+          |<----------aN------------>|<-----rN------>|
+                                    |<-cN->|<---C--->|
+
+final result
+|<--------------------avg_len------------>
+
+Where::
+
+    C = min_len
+    T = max_len - min_len
+    A : forward search target length.
+      = tgt_len
+    c : previous block total regression longer than C.
+      = c1 + c2 + ... + cN
+    t : initial match search length.
+      = T - c
+    d : probability of initial search not matching.
+      = e^-(t/A)
+    a : avg initial match length excluding regressions.
+      = c + A - d*(T+A)
+    Ak : kth regression backwards search target length.
+       = A        ; k=1
+         A(k-1)/2 ; k>1
+    crk : avg previous block regression longer than C for kth regression,
+        = ck + c(k+1) + c(k+2) + ... + cN
+    tk : kth regression search length.
+       = T - crk
+    dk : probability of kth regression not matching.
+       = e^-(tk/Ak)
+    drk : probability of kth regression happening.
+        = d * d1 * ... * d(k-1)
+    dCk : probability of regressing longer than C for kth regression.
+        = e^-(C/Ak)
+    rk : regression length for kth regression.
+       = Ak - dk*(tk+Ak)
+    ak : avg length for kth regression.
+       = drk*((1-dk)*T - rk)
+    ck : avg regression longer than C for kth regression
+       = drk * (dCk*Ak - dk*(tk - C + Ak))
+    avg_len = C + a + a1 + a2 +...+ aN + dr(N+1)*T
+
+Solving this for ``c`` (and all ``ck``) to get avg_len can be done iteratively.
+However, testing shows that this gives a value for ``c`` that is about 15% too
+big. This suggests there is still some missing factor or error. Fortunately
+just adding in a 0.85 scaling factor for the ``ck`` values gives results
+within 1% of this calculation.
+
+Note that this regression undermines the speed benefits of cut-point-skipping
+with a large min_len a bit, since scanning of the start of blocks is not fully
+skipped, but is scanned as the end of the previous block before regression.
+However, this only hurts when regression happens, which is less than 14% of
+the time with min_len=0.5x, max_len=1.5x.
 
 Testing
 =======
