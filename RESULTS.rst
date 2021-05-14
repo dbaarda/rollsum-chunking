@@ -374,35 +374,35 @@ effect is tricky, but can be approximated by a c additional offset to min_len,
 and cr0..crN additional offsets for each regression. It looks a bit like
 this::
 
-Initial search
-                        |----A------->                 < forward search
-|<--------------------max_len----------------------->|
-|<---C--->|<----------------T----------------------->|
-          |<-----c----->|<-----------t-------------->|
-          |<---------a--------------->|
+    Initial search
+                            |----A------->                 < forward search
+    |<--------------------max_len----------------------->|
+    |<---C--->|<----------------T----------------------->|
+              |<-----c----->|<-----------t-------------->|
+              |<---------a--------------->|
 
-1st regression
-                                  <-----A1-----------| < backwards search
-          |<---cr1--->|<------------t1-------------->|
-          |<-------a1----------->|<--------r1------->|
-                                |<---c1--->|<---C--->|
+    1st regression
+                                      <-----A1-----------| < backwards search
+              |<---cr1--->|<------------t1-------------->|
+              |<-------a1----------->|<--------r1------->|
+                                    |<---c1--->|<---C--->|
 
 
-2nd regresson
-                                    <-----A2---------| < backwards search
-          |<--cr2-->|<--------------t2-------------->|
-          |<----------a2---------->|<------r2------->|
-                                  |<--c2-->|<---C--->|
-        :                      :
+    2nd regresson
+                                        <-----A2---------| < backwards search
+              |<--cr2-->|<--------------t2-------------->|
+              |<----------a2---------->|<------r2------->|
+                                      |<--c2-->|<---C--->|
+            :                      :
+            :                      :
+    nth regression
+                                          <-----AN-------| < backwards search
+              |<-crN->|<--------------tN---------------->|
+              |<----------aN------------>|<-----rN------>|
+                                        |<-cN->|<---C--->|
 
-nth regression
-                                      <-----AN-------| < backwards search
-          |<-crN->|<--------------tN---------------->|
-          |<----------aN------------>|<-----rN------>|
-                                    |<-cN->|<---C--->|
-
-final result
-|<--------------------avg_len------------>
+    final result
+    |<--------------------avg_len------------>
 
 Where::
 
@@ -449,7 +449,9 @@ Note that this regression undermines the speed benefits of cut-point-skipping
 with a large min_len a bit, since scanning of the start of blocks is not fully
 skipped, but is scanned as the end of the previous block before regression.
 However, this only hurts when regression happens, which is less than 14% of
-the time with min_len=0.5x, max_len=1.5x.
+the time with min_len=0.5x, max_len=1.5x. For large max_len regressions nearly
+never happen, and for max_len>=4.0 it behaves identical to the standard simple
+chunker.
 
 Testing
 =======
@@ -514,10 +516,17 @@ calculating the target and average lengths.
 
 .. image:: data/sizeavg-weibullt2-x-t-8.0.svg
 
+.. image:: data/sizeavg-rc4-x-t-1.25.svg
+
 These show the average size is nearly always within 1% of the target average.
 You can also see it increases with the increasing target average. This is
 because for the same data size, larger chunk sizes means less chunks, giving
 us less random data, so there is more random noise.
+
+The rc4 sizes show a small but clear bias towards underestimating the average
+for max=1.25x, min=0.0x which supports the theory that there is something
+missing in our modelling. However, it's still well within 1% so it's
+acceptable.
 
 How size stddev varies with min limit
 -------------------------------------
@@ -535,9 +544,9 @@ distribution "tighter". The downward gradient is steepest for the
 improves its deduplication so much; it significantly reduces the maximum chunk
 sizes.
 
-The chunker, weibull1 and weibull2 straight lines exactly match what the maths
-says we should see for these distributions, further validating our maths and
-implementation.
+The chunker, weibull1, weibull2, and rc4 straight lines exactly match what the
+maths says we should see for these distributions, further validating our maths
+and implementation.
 
 How deduplication varys with max limit
 --------------------------------------
@@ -561,14 +570,22 @@ shown here.
 
 .. image:: data/perf-weibull2-t-0.0-x.svg
 
-These show that deduplication is worse when the max limit is small, and there
-are diminishing benefits once you get past a certain size. The
-"tighter" the distribution, the lower the point of diminshing returns. For
-Weibull2 and nc3 that point is at about 2x. For Weibull1 and nc2 it's around 3x,
-and for Chunker and nc1 it's 4x.
+.. image:: data/perf-rc4-t-0.0-x.svg
 
-This is what you would expect given that <2% of chunks are larger than these
-multiples according to the CDP(x) functions for these distributions.
+These show that in general deduplication is worse when the max limit is small,
+and there are diminishing benefits once you get past a certain size. The
+"tighter" the distribution, the lower the point of diminshing returns. For
+Weibull2 and nc3 that point is at about 2x. For Weibull1 and nc2 it's around
+3x, and for Chunker and nc1 it's 4x. This is what you would expect given that
+<2% of chunks are larger than these multiples according to the CDP(x)
+functions for these distributions.
+
+The rc4 algorithm is an interesting exception; deduplication gets worse when
+the max limit is large! For max>=2.0x deduplication declines. This is because
+regression still gives good resynchronisation for small max limits, while also
+reducing number of large blocks. The deduplication benefits of less large
+blocks outweighs the resyncronisation cost of using a weaker chunk boundary
+selection criteria when regressing.
 
 How deduplication varys with min limit
 --------------------------------------
@@ -578,6 +595,8 @@ This measures how the min_len limit affects deduplication.
 We use max_len = 8x as this avoids the impact of max-length truncations.
 
 .. image:: data/perf-chunker-t-x-8.0.svg
+
+.. image:: data/perf-chunker-t-x-1.25.svg
 
 Surprisingly, for the standard exponential chunker, deduplication gets better
 as min_len is increased, peaking at around 0.4x avg_len before it starts to
@@ -600,9 +619,15 @@ recommended min_len = tgt_len/4,  max_len=tgt_len*4.
 
 .. image:: data/perf-nc1-t-x-8.0.svg
 
+.. image:: data/perf-nc1-t-x-1.25.svg
+
 .. image:: data/perf-nc2-t-x-8.0.svg
 
+.. image:: data/perf-nc2-t-x-1.25.svg
+
 .. image:: data/perf-nc3-t-x-8.0.svg
+
+.. image:: data/perf-nc3-t-x-1.25.svg
 
 For FastCDC's normalized chunking, deduplication declines as min_len is
 increased. There is perhaps a tiny improvement with NC1 upto min_len=0.3x, but
@@ -614,7 +639,11 @@ compared them for the same average chunk length.
 
 .. image:: data/perf-weibull1-t-x-8.0.svg
 
+.. image:: data/perf-weibull1-t-x-1.25.svg
+
 .. image:: data/perf-weibull2-t-x-8.0.svg
+
+.. image:: data/perf-weibull2-t-x-1.25.svg
 
 Weibull1 and Weibull2 respond similar to increasing min_len as nc2 and nc3
 respectively. This is not that surprising given these algorithms were intended
@@ -622,50 +651,85 @@ to copy and improve the nomalizing done by FastCDC's normalized chunking.
 
 .. image:: data/perf-weibullt1-t-x-8.0.svg
 
+.. image:: data/perf-weibullt1-t-x-1.25.svg
+
 .. image:: data/perf-weibullt2-t-x-8.0.svg
+
+.. image:: data/perf-weibullt2-t-x-1.25.svg
 
 These are an improvement over Weibull's response to min_len, with nearly no
 impact on deduplication for min_len up to 0.5x and 0.4x respectively before it
 starts to decline.
 
+.. image:: data/perf-rc4-t-x-8.0.svg
+
+.. image:: data/perf-rc4-t-x-1.25.svg
+
+For RC4 the behavour is nearly identical to Chunker, but note that it is
+consistently better for small max=1.25x
+
 .. image:: data/perf-t-8-x-8.0.svg
 
+.. image:: data/perf-t-8-x-2.0.svg
+
+.. image:: data/perf-t-8-x-1.25.svg
+
 Comparing the algorithm's performance against each other vs min_len for
-avg_len = average-duplicate-run-length/2, we see the best deduplication is for
-chunker with min_len = 0.4x~0.5x. At lower min_len values other algorithms do
-better, but chunker clearly wins for min_len >= 0.4x. Note that increasing
-min_len increases chunker speed, so there is no incentive for setting it lower
-if it also reduces deduplication. The order from best to worst varys a little
-with min_len, but generally is nc3, weibull2, nc2, weibull1, weibullt2, nc1,
-weibullt1, chunker.
+avg_len = average-duplicate-run-length/2 and large max_len = 8.0x, we see the best
+deduplication is for chunker (and identical rc4) with min_len = 0.4x~0.5x. At
+lower min_len values other algorithms do better, but chunker clearly wins for
+min_len >= 0.4x. Note that increasing min_len increases chunker speed, so
+there is no incentive for setting it lower if it also reduces deduplication.
+The order from best to worst varys a little with min_len, but generally is
+nc3, weibull2, nc2, weibull1, weibullt2, nc1, weibullt1, chunker.
+
+With small max_len=1.25x we see significant trucation effects which allow rc4
+to pull clearly ahead, performing best with min_len = 0.5x. At a more moderate
+max_len = 2.0x rc4 is still winning but the margin is reduced.
 
 .. image:: data/perf-t-16-x-8.0.svg
 
+.. image:: data/perf-t-16-x-1.25.svg
+
 For a longer average block length equal to the average-duplicate-run-length,
-chunker is more clearly in front, and the peak deduplication shifts left to
-min_len = 0.3x, but 0.4x and even 0.5x are still competitive.
+chunker (and identical rc4) is more clearly in front for large max_len, and
+the peak deduplication shifts left to min_len = 0.3x, but 0.4x and even 0.5x
+are still competitive. For small max_len rc4 retains a reduced lead with the
+peak shifted to min_len = 0.4.
 
 .. image:: data/perf-t-1-x-8.0.svg
+
+.. image:: data/perf-t-1-x-1.25.svg
 
 This comparison holds if avg_len is significantly smaller than the average
 duplicate-run-length.
 
 .. image:: data/perf-t-64-x-8.0.svg
 
+.. image:: data/perf-t-64-x-1.25.svg
+
 And for avg_len significantly larger than the average duplicate-run-length,
-chunker always wins.
+chunker (and identical rc4) always wins for large max_len, but for small
+max_len it's less clear, with rc4 loosing its lead. This suggest rc4's
+truncation benefits don't help if the average block size is significantly
+larger than the duplicate-run-length.
 
 .. image:: data/perf-t-x-0.5-8.0.svg
 
-For min_len=0.5x the comparison holds for all avg_len chunk sizes.
+For min_len=0.5x and large max_len, the comparison holds for all avg_len chunk
+sizes.
 
 .. image:: data/perf-t-x-0.5-2.0.svg
 
-If we reduce the max_len to 2x with min_len=0.5, chunker still wins, but the
-gap with the other algorithms closes, because their tighter distribution
-curves ensures less truncation effects from a small max_len. However, this
-effect is still not enough to make it better than the simplest exponential
-chunker.
+If we reduce the max_len to 2x with min_len=0.5, rc4 pulls ahead of chunker
+because of its better truncation handling. Also the chunker lead over the
+other algorithms closes, because their tighter distribution curves ensures
+less truncation effects from a small max_len. However, this effect is still
+not enough to make them better.
+
+.. image:: data/perf-t-x-0.5-1.25.svg
+
+For tiny max_len, rc4 always wins by a clear margin.
 
 So the simplest exponential chunker algorithm is the fastest and has the best
 deduplication, provided you set min_len large enough. For best deduplication
@@ -674,6 +738,14 @@ and good speed you want to set ``min_len = tgt_len = avg_len/2, max_len >=
 of deduplication, becoming very expensive beyond ``min_len = 2*tgt_len =
 0.66*avg_len``. Smaller max_len can be used to reduce the large block size,
 but at the cost of deduplication.
+
+For small max_len <= 2.0x rc4's superior truncation handling makes a big
+difference, with max_len = 2.0x peforming as well as larger max_len values.
+Recommended values would be the same as chunker for min_len = 0.5x together
+with max_len = 2.0x. However, regression does have a complexity and
+performance cost, and doesn't deduplicate any better than the simple
+exponential chunker with max_len >= 4.0x. So rc4 is probably not worth using
+unless you have a clear requirement for max_len <= 2.0x.
 
 Summary
 =======
@@ -703,6 +775,11 @@ minimum size. Fancier normalization algorithms can give a more normal
 distribution of chunk sizes, but this is always at the cost of deduplication.
 Surprisingly exponential chunking gets better deduplication as the minimum
 size is increased well beyond the normally recommended values.
+
+RC4's superior truncation handling makes it the best solution if there is a
+strict requirement for max_len <= 2.0x, and should be used with min_len =
+0.5x. However, it has an additional complexity and performance cost that is
+probably not worth it for max_len >= 4.0x.
 
 The simple exponential chunker is the fastest and has best deduplication for a
 target average block size provided it is used with the right min_len and
