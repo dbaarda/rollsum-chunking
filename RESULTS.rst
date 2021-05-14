@@ -590,9 +590,9 @@ selection criteria when regressing.
 How deduplication varys with min limit
 --------------------------------------
 
-This measures how the min_len limit affects deduplication.
-
-We use max_len = 8x as this avoids the impact of max-length truncations.
+This measures how the min_len limit affects deduplication. We use max_len = 8x
+to show the impact while avoiding max_len truncations, and max_len = 1.25x to
+show the impact with lots of max_len truncations.
 
 .. image:: data/perf-chunker-t-x-8.0.svg
 
@@ -666,7 +666,7 @@ starts to decline.
 .. image:: data/perf-rc4-t-x-1.25.svg
 
 For RC4 the behavour is nearly identical to Chunker, but note that it is
-consistently better for small max=1.25x
+consistently better than Chunker for small max_len = 1.25x.
 
 .. image:: data/perf-t-8-x-8.0.svg
 
