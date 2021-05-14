@@ -587,6 +587,14 @@ reducing number of large blocks. The deduplication benefits of less large
 blocks outweighs the resyncronisation cost of using a weaker chunk boundary
 selection criteria when regressing.
 
+.. image:: data/perf-t-8-0.5-x.svg
+
+Comparing the algorithm's performance against each other vs max_len for
+avg_len = average-duplicate-run-length/2 and optimal (see below) min_len =
+0.5x, we see for small max_len <= 2.0x rc4 is the best, but for max_len <=
+0.4x it is identical to chunker. The order of best to worst is rc4, chunker,
+weibullt1, nc1, weibullt2, weibull1, nc2, weibull2, nc3.
+
 How deduplication varys with min limit
 --------------------------------------
 
