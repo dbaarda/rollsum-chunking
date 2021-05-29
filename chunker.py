@@ -606,41 +606,6 @@ class RC4Chunker(Chunker):
     return False
 
 
-class FastWeibull2Chunker(Weibull2Chunker):
-  """ FastWeibull2Chunker class.
-
-  This is the same as Weibull2Chunker except it aproximates it using integers only
-  to increment prob every dx iterations. This turns out slower in Python, but
-  it would almost certainly be a faster in C.
-  """
-
-  def reset(self):
-    # Set incr needed by initblock() called by super().
-    self.incr = 0
-    super(FastWeibull2Chunker, self).reset()
-    # set default update interval and scaling values. These scaling values ensure
-    # that incr is large enough to be accurate enough (greater than 2^7).
-    dx, incr = 1, 2*self.M
-    while incr < 128:
-      dx *= 2
-      incr = 2 * self.M * dx**2
-    self.incr, self.mask = int(incr + 0.5), dx - 1
-    # Call initblock() to initialize again with correctly set incr.
-    self.initblock()
-
-  def initblock(self):
-    self.blk_len = 0
-    self.prob = 0
-    self.step = self.incr // 2
-
-  def incblock(self):
-    self.blk_len += 1
-    x = self.blk_len - self.min_len
-    if (x > 0) and (x & self.mask == 0):
-      self.prob += self.step
-      self.step += self.incr
-
-
 def runtest(chunker, data, data_len):
   # Stop after we've read enough data and finished a whole block.
   chunker.scan(data, data_len)
@@ -712,8 +677,7 @@ chunkers = dict(
     nc1=NC1Chunker,
     nc2=NC2Chunker,
     nc3=NC3Chunker,
-    rc4=RC4Chunker,
-    fastweibull2=FastWeibull2Chunker)
+    rc4=RC4Chunker)
 
 # Get the standard and (suspected) optimal chunker min fraction.
 minchunkerstd = 0.2
