@@ -655,7 +655,7 @@ def alltests(cls, tsize, bsize):
     for bmin in bmins:
       addtest(results, data, dsize, bsize, cls, bavg, bmin, 8.0)
       addtest(results, data, dsize, bsize, cls, bavg, bmin, 1.25)
-    for bmax in bmaxs: 
+    for bmax in bmaxs:
       addtest(results, data, dsize, bsize, cls, bavg, 0.0, bmax)
     addtest(results, data, dsize, bsize, cls, bavg, 0.5, 2.0)
   bavg = 8.0
@@ -679,16 +679,6 @@ chunkers = dict(
     nc3=NC3Chunker,
     rc4=RC4Chunker)
 
-# Get the standard and (suspected) optimal chunker min fraction.
-minchunkerstd = 0.2
-minchunkeropt = log(2) / (1 + log(2))
-# Get the fastcdc standard avg and min fraction (min=8K, tgt=8K, max=64k).
-avgnc1std = NC1Chunker.get_avg_len(8*1024, 8*1024, 64*1024)
-minnc1std = 8.0*1024 / avgnc1std
-# Get the fastcdc optimized avg and min fraction (min=4K, tgt=8K, max=64k).
-avgnc1opt = NC1Chunker.get_avg_len(8*1024, 4*1024, 64*1024)
-minnc1opt = 4.0*1024 / avgnc1std
-
 # This code is to quicly test RC4 avg_len calculations.
 # tsize=1000
 # min = 0.0
@@ -703,6 +693,7 @@ minnc1opt = 4.0*1024 / avgnc1std
 #     print(avg_b / c.avg_len)
 #     print()
 # exit(1)
+
 
 def usage(code, error=None, *args):
   if error:
